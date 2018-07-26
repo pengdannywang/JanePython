@@ -5,7 +5,7 @@ Created on 24Jul.,2018
 '''
 import unittest
 from jane.ImportExcel import ImportExcel
-
+from jane.JaneP import JaneP
 import pandas as pd
 import numpy as np
 
@@ -14,8 +14,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.ie=ImportExcel()
-        self.ie.loadFiles()
+        self.jan=JaneP()
 
 
     def tearDown(self):
@@ -43,11 +42,25 @@ class Test(unittest.TestCase):
                 sub=df.query("parent=='"+p+"'")
                 
                 print(sub)
-                
+    @unittest.skip            
     def testCalculate(self):
         arr=['GROSS SALES - OG','FREIGHT - OG','DISCOUNTS - OG','NET SALES - OG']
         test=self.ie.repos.query("name in "+str(arr))
         print("------testCalculate------")
+        print(test)
+    @unittest.skip
+    def testShowHead(self):
+        print(self.jan.pres.listHead(self.jan.repos))
+        
+        
+    def testPresentationListRow(self):
+        account='GROSS SALES - OG'
+        col='02'
+        arr=['GROSS SALES - OG','FREIGHT - OG','DISCOUNTS - OG','NET SALES - OG']
+        test=self.jan.repos.query("name in "+str(arr))
+        
+        test.reindex(['a17','f18','b18', 'b19', 'f18VSa17', 'f18VSb18','b19VSf18'],level='type')
+        
         print(test)
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

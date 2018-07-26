@@ -3,6 +3,8 @@ Created on 25 Jul. 2018
 
 @author: pengwang
 '''
+import pandas as pd
+import numpy as np
 
 class Presentation(object):
     '''
@@ -10,7 +12,7 @@ class Presentation(object):
     '''
 
 
-    def __init__(self, params):
+    def __init__(self):
         '''
         Constructor
         '''
@@ -23,3 +25,12 @@ class Presentation(object):
     def listRow(self,col,accountName,data):
         return data.query("name=='"+accountName+"'")[col].tolist()
         
+    def getParents(self,presdf):
+    
+        parents=pd.unique(presdf['parent'])
+        return (parents)
+    
+    def getSubByAParent(self,parent,presentation):
+        return presentation.query("parent=='"+parent+"'")
+    
+    

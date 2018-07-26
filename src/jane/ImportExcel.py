@@ -78,7 +78,10 @@ class ImportExcel(object):
 
     def loadPresentation(self,sheetName):
         presentListlists = self.co.worksheet(sheetName).get_all_values()
-       
+        df=pd.DataFrame(columns=['accounts','parent','level','percentages','formula'])
+        for i in range(1,len(presentListlists)):
+            row=[presentListlists[i][0],presentListlists[i][1],presentListlists[i][2],presentListlists[i][3],presentListlists[i][4]]
+            df.loc[len(df)]=row
         return presentListlists
     def getSubByArray(self,names):
         return self.repos.query("name in "+str(names))

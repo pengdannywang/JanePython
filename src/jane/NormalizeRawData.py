@@ -63,6 +63,8 @@ def convertListListToDf(data):
                 arr.loc[len(arr)]=m
     
     return arr
+
+
 def setIndexesByTypeAndName(typeName,rawData):
     
     rawData['type']=typeName
