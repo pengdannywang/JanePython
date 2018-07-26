@@ -30,5 +30,13 @@ class Presentation(object):
     def getSubByAParent(self,parent,presentation):
         return presentation.query(ci.CONFIG_PARENT+"=='"+parent+"'")
     
+    def getAllAccounts(self,rawPres):
+        accounts=rawPres[ci.CONFIG_ACCOUNT]
+        cols=[ci.INDEX_NAME]+ci.INDEX_NAME,ci.SORT_INDEXES*len(ci.COLUMNS_WITHOUT_INDEXES)
+        presentation=pd.DataFrame(columns=cols)
+        presentation.loc[len(presentation)]=0
+#         for a in accounts:
+            
+    
     
     
