@@ -12,15 +12,15 @@ import pandas as pd
 class COLINDEX:
     mth=datetime.now().month
     NEXT_MONTH_NUM=mth+1
-    INDEX_A17 = 'INDEX_A17'
-    INDEX_B18 = 'INDEX_B18'
-    INDEX_F18 = 'INDEX_F18'
-    INDEX_B19 = 'INDEX_B19'
+    INDEX_A17 = 'a17'
+    INDEX_B18 = 'b18'
+    INDEX_F18 = 'f18'
+    INDEX_B19 = 'b19'
     INDEX_F18VSB18 = 'f18VSb18'
     INDEX_B19VSF18 = 'b19VSf18'
     INDEX_F18VSA17 = 'f18VSa17'
     INDEX_TYPE = 'type'
-    INDEX_NAME = 'INDEX_NAME'
+    INDEX_NAME = 'name'
     SORT_INDEXES= [INDEX_A17,INDEX_F18,INDEX_B18,INDEX_B19,INDEX_F18VSA17,INDEX_F18VSB18,INDEX_B19VSF18]
     
     JAN="01"
@@ -107,7 +107,7 @@ def setIndexesByTypeAndName(typeName,rawData):
 def generateB19(data):
     b19=pd.DataFrame().reindex_like(data).fillna(0).replace([np.inf,-np.inf],0)
     typeName=data.index.get_level_values(COLINDEX.INDEX_TYPE)[1]
-    b19.rename(index={typeName:b19},inplace=True)
+    b19.rename(index={typeName:COLINDEX.INDEX_B19},inplace=True)
 
     return b19
 
