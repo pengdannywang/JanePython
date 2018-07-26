@@ -5,13 +5,9 @@ Created on 25 Jul. 2018
 '''
 import pandas as pd
 import numpy as np
-
+from jane.NormalizeRawData import COLINDEX as ci
 class Presentation(object):
-    '''
-    classdocs
-    '''
-
-
+    
     def __init__(self):
         '''
         Constructor
@@ -24,13 +20,15 @@ class Presentation(object):
       
     def listRow(self,col,accountName,data):
         return data.query("name=='"+accountName+"'")[col].tolist()
+    
         
     def getParents(self,presdf):
-    
-        parents=pd.unique(presdf['parent'])
+        parents=pd.unique(presdf[ci.CONFIG_PARENT])
         return (parents)
     
+    
     def getSubByAParent(self,parent,presentation):
-        return presentation.query("parent=='"+parent+"'")
+        return presentation.query(ci.CONFIG_PARENT+"=='"+parent+"'")
+    
     
     

@@ -16,6 +16,7 @@ class JaneP(object):
         self.mth=datetime.now().month
         ie=ImportExcel()
         ie.loadFiles()
+        self.rawPres=ie.loadPresentation('interface1')
         self.repos=ie.repos
         self.pres=Presentation()
 

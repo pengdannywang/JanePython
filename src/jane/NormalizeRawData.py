@@ -5,53 +5,85 @@ Created on 24Jul.,2018
 '''
 from datetime import datetime
 import re
-
 import numpy as np
 import pandas as pd
-from json.decoder import NaN
+
+
+class COLINDEX:
+    mth=datetime.now().month
+    NEXT_MONTH_NUM=mth+1
+    INDEX_A17 = 'INDEX_A17'
+    INDEX_B18 = 'INDEX_B18'
+    INDEX_F18 = 'INDEX_F18'
+    INDEX_B19 = 'INDEX_B19'
+    INDEX_F18VSB18 = 'f18VSb18'
+    INDEX_B19VSF18 = 'b19VSf18'
+    INDEX_F18VSA17 = 'f18VSa17'
+    INDEX_TYPE = 'type'
+    INDEX_NAME = 'INDEX_NAME'
+    SORT_INDEXES= [INDEX_A17,INDEX_F18,INDEX_B18,INDEX_B19,INDEX_F18VSA17,INDEX_F18VSB18,INDEX_B19VSF18]
+    
+    JAN="01"
+    FEB="02"
+    MAR="03"
+    APR="04"
+    MAY="05"
+    JUN="06"
+    JUL="07"
+    AUG="08"
+    SEP="09"
+    OCT="10"
+    NOV="11"
+    DEC="12"
+    COL_TOTAL = 'Total'
+    COL_MONTHLYAVERAGE = "monthly average"
+    COL_PAST_OF_YEAR="1 to "+str(mth)
+    COL_FUTURE_OF_YEAR=str(datetime.now().month+1)+" To 12"
+    COL_SPRING = "1ST QUARTER"
+    COL_SUMMER="2ND QUARTER"
+    COL_AUTUMN="3RD QUARTER"
+    COL_WINTER="4ST QUARTER"
+    ACCOUNT_NAME = 'accountsName'
+
+    COLUMNS_INITIAL=[INDEX_NAME,JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC]
+    COLUMNS_WITHOUT_INDEXES=[JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC,COL_TOTAL,COL_MONTHLYAVERAGE,COL_SPRING,COL_SUMMER,COL_AUTUMN,COL_WINTER]
+    COLUMNS_ALL=[INDEX_TYPE,INDEX_NAME,JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC,COL_TOTAL,COL_MONTHLYAVERAGE,COL_SPRING,COL_SUMMER,COL_AUTUMN,COL_WINTER]
+    
+    CONFIG_ACCOUNT='accounts'
+    CONFIG_PARENT='parent'
+    CONFIG_LEVEL='level'
+    CONFIG_PRECENTAGES='percentages'
+    CONFIG_FORMULA='formula'
+    CONFIG_COLUMNS=[CONFIG_ACCOUNT,CONFIG_PARENT,CONFIG_LEVEL,CONFIG_PRECENTAGES,CONFIG_FORMULA]
+
 
 
 def normalize(typeName,rawData):
     data=convertListListToDf(rawData)
     data=removeEmptyRow(data)
     data= createRemainingCol(data)
-    data.drop_duplicates(subset='name', keep='first', inplace=True)
+    data.drop_duplicates(subset=COLINDEX.INDEX_NAME, keep='first', inplace=True)
     data=setIndexesByTypeAndName(typeName, data)
-    return data            
+    return data      
+
+      
 #create columns: "1 to month" "month to 12","monthly average","1st quarter" -"4th quarter"
-def createRemainingCol(rawDf):
-    mth=datetime.now().month
-    rawDf['Total']=rawDf.sum(axis=1)
-
-    position=mth+1
+def createRemainingCol(rawDf):  
+    rawDf[COLINDEX.COL_TOTAL]=rawDf.sum(axis=1)
     # add column '1 To current Month'
-    colName="1 to "+str(mth)
-    rawDf[colName]=rawDf.iloc[:,1:position].sum(axis=1)
-
+    rawDf[COLINDEX.COL_PAST_OF_YEAR]=rawDf.iloc[:,1:COLINDEX.NEXT_MONTH_NUM].sum(axis=1)
     #add column 'next Month to 12
-    colName=str(mth+1) +" To 12"
-    rawDf[colName]=rawDf.iloc[:,position:13].sum(axis=1)
-
-    
-    colName="monthly average"
-    rawDf[colName]=rawDf.mean(axis=1)
-
-    colName="1ST QUARTER"
-    rawDf[colName]=rawDf.iloc[:,1:4].sum(axis=1)
-
-    colName="2ND QUARTER"
-    rawDf[colName]=rawDf.iloc[:,4:7].sum(axis=1)
-
-    colName="3RD QUARTER"
-    rawDf[colName]=rawDf.iloc[:,7:10].sum(axis=1)
-
-    colName="4ST QUARTER"
-    rawDf[colName]=rawDf.iloc[:,10:13].sum(axis=1)
+    rawDf[COLINDEX.COL_FUTURE_OF_YEAR]=rawDf.iloc[:,COLINDEX.NEXT_MONTH_NUM:13].sum(axis=1)
+    rawDf[COLINDEX.COL_MONTHLYAVERAGE]=rawDf.mean(axis=1)
+    rawDf[COLINDEX.COL_SPRING]=rawDf.iloc[:,1:4].sum(axis=1)
+    rawDf[COLINDEX.COL_SUMMER]=rawDf.iloc[:,4:7].sum(axis=1)
+    rawDf[COLINDEX.COL_AUTUMN]=rawDf.iloc[:,7:10].sum(axis=1)
+    rawDf[COLINDEX.COL_WINTER]=rawDf.iloc[:,10:13].sum(axis=1)
     return rawDf
 
     
 def convertListListToDf(data):
-    arr=pd.DataFrame(columns=["name","01","02","03","04","05","06","07","08","09","10","11","12"])
+    arr=pd.DataFrame(columns=COLINDEX.COLUMNS_INITIAL)
     for i in range(len(data)):
         cname=data[i][0]
         if(validStr(cname)):
@@ -61,37 +93,38 @@ def convertListListToDf(data):
                 m.append(mth)
             if(validateList(m)):
                 arr.loc[len(arr)]=m
-    
     return arr
 
 
 def setIndexesByTypeAndName(typeName,rawData):
-    
-    rawData['type']=typeName
-    data=rawData.set_index(['type','name'])
+    rawData[COLINDEX.INDEX_TYPE]=typeName
+    data=rawData.set_index([COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME])
     return data
     #isin(x) x must be a list or array. using df.columnName to get a list 
     #    
 
 
 def generateB19(data):
-        b19=pd.DataFrame().reindex_like(data).fillna(0).replace([np.inf,-np.inf],0)
-        typeName=data.index.get_level_values('type')[1]
-        b19.rename(index={typeName:'b19'},inplace=True)
-        return b19
+    b19=pd.DataFrame().reindex_like(data).fillna(0).replace([np.inf,-np.inf],0)
+    typeName=data.index.get_level_values(COLINDEX.INDEX_TYPE)[1]
+    b19.rename(index={typeName:b19},inplace=True)
+
+    return b19
 
     
 def reduceRepositoryByAccounts(data,accountList):
-    data=data.loc[data.index.levels[1].isin(accountList['accountsName'])]
-    typeName=data.index.levels[0][0]
-    temp=accountList[ ~accountList['accountsName'].isin(data.index.levels[1].tolist())]
-    lv1=np.repeat(typeName,len(temp)).tolist()
-    lv2=temp['accountsName'].tolist()
-    ts=list(zip(lv1,lv2))
-    mindx=pd.MultiIndex.from_tuples(ts, names=['type','name'])
-    rows=pd.DataFrame(columns=data.columns,index=mindx).fillna(0)
+    
+    data=data.loc[data.index.levels[1].isin(accountList[COLINDEX.ACCOUNT_NAME])]
+    index_type=data.index.levels[0][0]
+    temp=accountList[~accountList[COLINDEX.ACCOUNT_NAME].isin(data.index.levels[1].tolist())]
+    lv1=np.repeat(index_type,len(temp)).tolist()
+    lv2=temp[COLINDEX.ACCOUNT_NAME].tolist()
+    tupleIndex=list(zip(lv1,lv2))
+    multiIndex=pd.MultiIndex.from_tuples(tupleIndex, names=[COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME])
+    rows=pd.DataFrame(columns=data.columns,index=multiIndex).fillna(0)
     data=data.append(rows)
     return data         
+  
             
 def validateList(row):
     validated=True
@@ -139,8 +172,8 @@ def validateList(row):
 
 def removeEmptyRow(df):
     df= df[df['01']!=0 ]
-    df=df[df.name!='Currency: AUD']
-    df=df[df.name!='name']
+    df=df[df.INDEX_NAME!='Currency: AUD']
+    df=df[df.INDEX_NAME!=COLINDEX.INDEX_NAME]
     return df
 
     
@@ -173,36 +206,41 @@ def validStr(str1):
     return validated
 
 
-def adjustAccountList(accountList):
-
-    accounts=pd.DataFrame(accountList,columns=['accountsName'])
+def removeEmptyRowForAccountList(accountList):
+ 
+    accounts=pd.DataFrame(accountList,columns=[COLINDEX.ACCOUNT_NAME])
     accounts.replace('',np.NaN,inplace=True)
+    #drop na row
     accounts=accounts.dropna(axis=0)
+    #drop first name
     accounts=accounts.drop(index=0,axis=0)
     return accounts
-#create b19,f18a17,f18b18 rows. generate indexes[type,name]
+
+
+#create INDEX_B19,f18a17,f18b18 rows. generate indexes[type,INDEX_NAME]
 def generatef18a17(data):
-    
     #f18a17=(p-a)/a 
-    f18a17=(data.loc['a17']-data.loc['b18']).div(data.loc['b18']).fillna(0).replace([np.inf,-np.inf],0)*100
-    f18a17['type']='f18VSa17'
+    f18a17=(data.loc[COLINDEX.INDEX_A17]-data.loc[COLINDEX.INDEX_B18]).div(data.loc[COLINDEX.INDEX_B18]).fillna(0).replace([np.inf,-np.inf],0)*100
+    f18a17[COLINDEX.INDEX_TYPE]=COLINDEX.INDEX_F18VSA17
     f18a17.reset_index(inplace=True)
-    f18a17.set_index(['type','name'],inplace=True)
+    f18a17.set_index([COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME],inplace=True)
     return f18a17
+
 
 def generatef18b18(data):
     #f18b18=(a-b)/b
-    f18b18=(data.loc['b18']-data.loc['f18']).div(data.loc['f18']).fillna(0).replace([np.inf,-np.inf],0)
-    f18b18['type']='f18VSb18'
+    f18b18=(data.loc[COLINDEX.INDEX_B18]-data.loc[COLINDEX.INDEX_F18]).div(data.loc[COLINDEX.INDEX_F18]).fillna(0).replace([np.inf,-np.inf],0)
+    f18b18[COLINDEX.INDEX_TYPE]=COLINDEX.INDEX_F18VSB18
     f18b18.reset_index(inplace=True)
-    f18b18.set_index(['type','name'],inplace=True)
+    f18b18.set_index([COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME],inplace=True)
     return f18b18
 
+
 def generateb19f18(data):
-    #b19f18
-    b19f18=(data.loc['b19']-data.loc['f18']).div(data.loc['f18']).fillna(0).replace([np.inf,-np.inf],0)
-    b19f18['type']='b19VSf18'
+    #b19f18  
+    b19f18=(data.loc[COLINDEX.INDEX_B19]-data.loc[COLINDEX.INDEX_F18]).div(data.loc[COLINDEX.INDEX_F18]).fillna(0).replace([np.inf,-np.inf],0)
+    b19f18[COLINDEX.INDEX_TYPE]=COLINDEX.INDEX_B19VSF18
     b19f18.reset_index(inplace=True)
-    b19f18.set_index(['type','name'],inplace=True)
+    b19f18.set_index([COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME],inplace=True)
     return b19f18
    
