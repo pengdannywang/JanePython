@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        self.JAN=JaneP()
+        self.jan=JaneP()
 
 
     def tearDown(self):
@@ -50,16 +50,14 @@ class Test(unittest.TestCase):
         print(test)
     @unittest.skip
     def testShowHead(self):
-        print(self.JAN.pres.listHead(self.JAN.repos))
+        print(self.jan.pres.listHead(self.jan.repos))
         
         
     def testPresentationListRow(self):
-        account='GROSS SALES - OG'
-        col='02'
-        arr=['GROSS SALES - OG','FREIGHT - OG','DISCOUNTS - OG','NET SALES - OG']
-        test=self.JAN.repos.query("name in "+str(arr))
+
+        test=self.jan.prestationData
         
-        test.reindex(['a17','f18','b18', 'b19', 'f18VSa17', 'f18VSb18','b19VSf18'],level='type')
+        
         
         print(test)
 if __name__ == "__main__":

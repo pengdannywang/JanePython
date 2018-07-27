@@ -31,7 +31,7 @@ class ImportExcel(object):
         #sheet =gspread.Worksheet("entityConfig")
         #gspread.Client.open_by_key("AIzaSyBa1wrSY683ni4DHIuxNSJaLhuuxJA5XCI")
         # Extract and print all of the values
-        
+        self.loadFiles()
 
 
         

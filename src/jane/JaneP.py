@@ -15,12 +15,11 @@ class JaneP(object):
     def __init__(self):
         self.mth=datetime.now().month
         ie=ImportExcel()
-        ie.loadFiles()
-        self.rawPres=ie.loadPresentation('interface1')
         self.repos=ie.repos
-        self.pres=Presentation()
-
-    
+        configPresentation=ie.loadPresentation('interface1')
+        pres=Presentation()
+        pres.getAllAccounts(configPresentation, self.repos)
+        self.prestationData=pres.getAllAccounts(configPresentation, self.repos)
 
 
 
