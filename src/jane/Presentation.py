@@ -40,6 +40,7 @@ class Presentation(object):
         return sub
     
     def getAllAccounts(self,configPresentation,repos):
+        
         parents1=self.getParents(configPresentation,1)
         parents2=self.getParents(configPresentation,2)
         parents3=self.getParents(configPresentation,3)
@@ -58,9 +59,8 @@ class Presentation(object):
                 
                 if( configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
-                    
                     break
-        print(pre_value)
+                
         for p in parents2:
             for i in range(0,len(configPresentation)):
 
@@ -68,9 +68,9 @@ class Presentation(object):
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
                     break
+                
         for p in parents3:
             for i in range(0,len(configPresentation)):
-
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
                     break    
