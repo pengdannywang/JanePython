@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
                 sub=df.query("parent=='"+p+"'")
                 
                 print(sub)
-    @unittest.skip            
+             
     def testCalculate(self):
         arr=['GROSS SALES - OG','FREIGHT - OG','DISCOUNTS - OG','NET SALES - OG']
         test=self.ie.repos.query("name in "+str(arr))
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
     def testShowHead(self):
         print(self.jan.pres.listHead(self.jan.repos))
         
-        
+    
     def testPresentationListRow(self):
 
         test=self.jan.prestationData

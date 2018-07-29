@@ -19,7 +19,7 @@ class ImportExcel(object):
         self.priorDf=pd.DataFrame()
         # use creds to create row client to interact with the Google Drive API
         scope =  ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name("C:/tools/JaneProject-f472d80e0028.json", scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name("/Users/pengwang/Downloads/JaneProject-614aeb27e1fc.json", scope)
         self.client = gspread.authorize(creds)    
         # Find row workbook by name and open the first sheet
         # Make sure you use the right name here.

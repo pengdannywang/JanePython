@@ -22,6 +22,7 @@ class Presentation(object):
         value=[accountName]
         for col in data.columns:
             value.extend(data.query(ci.INDEX_NAME+"=='"+accountName+"'")[col].tolist())
+            
         return value
     
     
@@ -44,46 +45,47 @@ class Presentation(object):
         parents3=self.getParents(configPresentation,3)
         parents4=self.getParents(configPresentation,4)
         cols=[ci.INDEX_NAME]+ci.SORT_INDEXES*len(ci.COLUMNS_WITHOUT_INDEXES)
-        presentation=pd.DataFrame(columns=cols)
-        i=j=0
+        pre_value=pd.DataFrame(columns=cols)
+
         for p in parents1:
             
             for i in range(0,len(configPresentation)):
                 
-    #             presentation.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
-               
-                if(configPresentation[ci.CONFIG_PARENT].loc[i]==p ):
-                    presentation.loc[len(presentation)]=self.listRow(configPresentation[ci.CONFIG_ACCOUNT].loc[i],repos)
-                    
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='1'): 
+                    if( configPresentation[ci.CONFIG_PARENT].loc[i]==p):
+                        pre_value.loc[len(pre_value)]=self.listRow(configPresentation[ci.CONFIG_ACCOUNT].loc[i],repos)
                 
-                if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    presentation.loc[len(presentation)]=self.getSumOfAParent(p, configPresentation, presentation)
-                    break
-                
+                    if( configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                        pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
+                        break
+     
         for p in parents2:
-            
             for i in range(0,len(configPresentation)):
-                #presentation.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
-                if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    presentation.loc[len(presentation)]=self.getSumOfAParent(p, configPresentation, presentation)
-                    break
-                
+
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='2'): 
+                    if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                        pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
+                        break
         for p in parents3:
-            
             for i in range(0,len(configPresentation)):
-                #presentation.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
-                if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    presentation.loc[len(presentation)]=self.getSumOfAParent(p, configPresentation, presentation)
-                    break
-                
+
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='3'): 
+                    if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                        pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
+                        break    
+                    
         for p in parents4:
-            
             for i in range(0,len(configPresentation)):
-                #presentation.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
-                if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    presentation.loc[len(presentation)]=self.getSumOfAParent(p, configPresentation, presentation)
-                    break             
-        return presentation   
+
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='4'): 
+                    if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                        pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
+                        break                
+        return pre_value
 #         for a in accounts:
             
     

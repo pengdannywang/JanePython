@@ -18,7 +18,7 @@ class JaneP(object):
         self.repos=ie.repos
         configPresentation=ie.loadPresentation('interface1')
         pres=Presentation()
-        pres.getAllAccounts(configPresentation, self.repos)
+       # pres.getAllAccounts(configPresentation, self.repos)
         self.prestationData=pres.getAllAccounts(configPresentation, self.repos)
 
 
