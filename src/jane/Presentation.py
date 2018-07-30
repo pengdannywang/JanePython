@@ -27,7 +27,7 @@ class Presentation(object):
     
     
     def getParents(self,presdf,level):
-        parents=(presdf.query(ci.CONFIG_LEVEL+"=='"+str(level)+"'"))[ci.CONFIG_PARENT].unique()
+        parents=(presdf.query(ci.CONFIG_LEVEL+"=='"+str(level)+"'"))[ci.CONFIG_ACCOUNT].unique()
         parents=list(filter(None,parents))
         return (parents)
     
@@ -38,13 +38,21 @@ class Presentation(object):
         sub[0]=parent
         
         return sub
-    
+        
+    def getPercentages(self,numerator,denominator,presentation):
+        
+        num=presentation[presentation[ci.INDEX_NAME]==numerator]
+        den=presentation[presentation[ci.INDEX_NAME]==denominator]
+
+        sub=num.div(den).fillna(0).replace([np.inf,-np.inf],0)*100
+        
+        return sub
     def getAllAccounts(self,configPresentation,repos):
         
-        parents1=self.getParents(configPresentation,1)
-        parents2=self.getParents(configPresentation,2)
-        parents3=self.getParents(configPresentation,3)
-        parents4=self.getParents(configPresentation,4)
+        parents1=self.getParents(configPresentation,2)
+        parents2=self.getParents(configPresentation,3)
+        parents3=self.getParents(configPresentation,4)
+        parents4=self.getParents(configPresentation,5)
         cols=[ci.INDEX_NAME]+ci.SORT_INDEXES*len(ci.COLUMNS_WITHOUT_INDEXES)
         pre_value=pd.DataFrame(columns=cols)
 
@@ -62,8 +70,12 @@ class Presentation(object):
                     break
                 
         for p in parents2:
+            
             for i in range(0,len(configPresentation)):
-
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='1'): 
+                    if( configPresentation[ci.CONFIG_PARENT].loc[i]==p):
+                        pre_value.loc[len(pre_value)]=self.listRow(configPresentation[ci.CONFIG_ACCOUNT].loc[i],repos)
     #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i] 
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
@@ -71,16 +83,28 @@ class Presentation(object):
                 
         for p in parents3:
             for i in range(0,len(configPresentation)):
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='1'): 
+                    if( configPresentation[ci.CONFIG_PARENT].loc[i]==p):
+                        pre_value.loc[len(pre_value)]=self.listRow(configPresentation[ci.CONFIG_ACCOUNT].loc[i],repos)
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
                     break    
                     
         for p in parents4:
             for i in range(0,len(configPresentation)):
-
+    #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='1'): 
+                    if( configPresentation[ci.CONFIG_PARENT].loc[i]==p):
+                        pre_value.loc[len(pre_value)]=self.listRow(configPresentation[ci.CONFIG_ACCOUNT].loc[i],repos)
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
-                    break                
+                    break
+        percent=configPresentation[ci.CONFIG_LEVEL=='10']
+        for i in range(0,len(percent)):
+            print(percent[ci.CONFIG_PRECENTAGES].loc[i]+"===="+ percent[ci.CONFIG_DENOMINATOR].loc[i])
+            pre_value.loc[len(pre_value)]=self.getPercentages(percent[ci.CONFIG_ACCOUNT].loc[i],percent[ci.CONFIG_PRECENTAGES].loc[i], percent[ci.CONFIG_DENOMINATOR].loc[i], pre_value)
+                           
         return pre_value
 #         for a in accounts:
             
