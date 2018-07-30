@@ -100,7 +100,8 @@ class Presentation(object):
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
                     break
-        percent=configPresentation[ci.CONFIG_LEVEL=='10']
+        percent=configPresentation.query(ci.CONFIG_LEVEL+"=='10'")
+        percent.reindex()
         for i in range(0,len(percent)):
             print(percent[ci.CONFIG_PRECENTAGES].loc[i]+"===="+ percent[ci.CONFIG_DENOMINATOR].loc[i])
             pre_value.loc[len(pre_value)]=self.getPercentages(percent[ci.CONFIG_ACCOUNT].loc[i],percent[ci.CONFIG_PRECENTAGES].loc[i], percent[ci.CONFIG_DENOMINATOR].loc[i], pre_value)

@@ -19,7 +19,7 @@ class ImportExcel(object):
         self.priorDf=pd.DataFrame()
         # use creds to create row client to interact with the Google Drive API
         scope =  ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name("/Users/pengwang/Downloads/JaneProject-614aeb27e1fc.json", scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name("E:/downloads/JaneProject-f472d80e0028.json", scope)
         self.client = gspread.authorize(creds)    
         # Find row workbook by name and open the first sheet
         # Make sure you use the right name here.
@@ -82,7 +82,7 @@ class ImportExcel(object):
         presentListlists = self.co.worksheet(sheetName).get_all_values()
         df=pd.DataFrame(columns=ci.CONFIG_COLUMNS)
         for i in range(1,len(presentListlists)):
-            row=[presentListlists[i][0],presentListlists[i][1],presentListlists[i][2],presentListlists[i][3],presentListlists[i][4]]
+            row=[presentListlists[i][0],presentListlists[i][1],presentListlists[i][2],presentListlists[i][3],presentListlists[i][4],presentListlists[i][5]]
             df.loc[len(df)]=row
         return df
     
