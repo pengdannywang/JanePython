@@ -14,16 +14,16 @@ class JaneP(object):
     
     def __init__(self):
         self.mth=datetime.now().month
-        ie=ImportExcel()
-        self.repos=ie.repos
-        configPresentation=ie.loadPresentation('interface1')
-        pres=Presentation()
+        self.ie=ImportExcel()
+        self.repos=self.ie.repos
+        self.configPresentation=self.ie.loadPresentation('interface1')
+        self.pres=Presentation()
         # pres.getAllAccounts(configPresentation, self.repos)
-        self.prestationData=pres.getAllAccounts(configPresentation, self.repos)
+        self.prestationData=self.pres.getAllAccounts(self.configPresentation, self.repos)
 
-
-
-        
+    def writeBackSheet(self):
+        sheet= self.ie.getSheet("Sheet4")
+        self.pres.writeToSheet(sheet, self.prestationData, self.configPresentation)
 if __name__ == "__main__":
     jan=JaneP()
 

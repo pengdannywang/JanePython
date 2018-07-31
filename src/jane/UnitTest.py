@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
     
     def testPresentationListRow(self):
 
-        test=self.jan.prestationData
+        test=self.jan.writeBackSheet()
         
         
         

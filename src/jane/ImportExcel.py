@@ -103,7 +103,8 @@ class ImportExcel(object):
         self.repos=self.repos.append(nrd.generatef18b18(self.repos))
         self.repos=self.repos.append(nrd.generateb19f18(self.repos))
     
-       
+    def getSheet(self,sheetName):
+        return self.co.worksheet(sheetName)
 if __name__ == "__main__":
     ie=ImportExcel()
     ie.loadFiles()

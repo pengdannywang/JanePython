@@ -39,14 +39,20 @@ class Presentation(object):
         
         return sub
         
-    def getPercentages(self,numerator,denominator,presentation):
+    def getPercentages(self,name,numerator,denominator,presentation):
         
-        num=presentation[presentation[ci.INDEX_NAME]==numerator]
-        den=presentation[presentation[ci.INDEX_NAME]==denominator]
-
+        num=presentation[presentation[ci.INDEX_NAME]==numerator].loc[:,presentation.columns!=ci.INDEX_NAME]
+        den=presentation[presentation[ci.INDEX_NAME]==denominator].loc[:,presentation.columns!=ci.INDEX_NAME]
+        num.reset_index(inplace=True,drop=True)
+        den.reset_index(inplace=True,drop=True)
         sub=num.div(den).fillna(0).replace([np.inf,-np.inf],0)*100
+        col=pd.DataFrame({ci.INDEX_NAME:[name]})
         
-        return sub
+        result=pd.concat([col,sub],axis=1,sort=False)
+        
+
+        
+        return result
     def getAllAccounts(self,configPresentation,repos):
         
         parents1=self.getParents(configPresentation,2)
@@ -100,15 +106,25 @@ class Presentation(object):
                 if(~pd.isnull(p) and configPresentation[ci.CONFIG_ACCOUNT].loc[i]==p):  
                     pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, configPresentation, pre_value)
                     break
-        percent=configPresentation.query(ci.CONFIG_LEVEL+"=='10'")
-        percent.reindex()
-        for i in range(0,len(percent)):
-            print(percent[ci.CONFIG_PRECENTAGES].loc[i]+"===="+ percent[ci.CONFIG_DENOMINATOR].loc[i])
-            pre_value.loc[len(pre_value)]=self.getPercentages(percent[ci.CONFIG_ACCOUNT].loc[i],percent[ci.CONFIG_PRECENTAGES].loc[i], percent[ci.CONFIG_DENOMINATOR].loc[i], pre_value)
-                           
+#         percent=configPresentation.query(ci.CONFIG_LEVEL+"=='10'")
+#         percent=percent.reset_index()
+#         for i in range(0,len(percent)):
+#  
+#             row=self.getPercentages(percent[ci.CONFIG_ACCOUNT].loc[i],percent[ci.CONFIG_PRECENTAGES].loc[i], percent[ci.CONFIG_DENOMINATOR].loc[i], pre_value)
+#             pre_value=pre_value.append(row,ignore_index=True)       
+            
         return pre_value
 #         for a in accounts:
             
-    
+    def writeToSheet(self,sheet,data,configPresentation):
+        accounts=configPresentation[ci.CONFIG_ACCOUNT]
+        sheet.append_row(data.columns.tolist())
+        for acc in accounts:
+            d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
+            if(~d.empty and len(d)>0):
+                print(d.iloc[0].tolist())
+                sheet.append_row(d.iloc[0].tolist())
+            else:
+                sheet.append_row([acc])
     
     
