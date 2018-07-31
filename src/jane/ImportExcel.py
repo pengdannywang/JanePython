@@ -105,8 +105,9 @@ class ImportExcel(object):
     
     def getSheet(self,sheetName):
         return self.co.worksheet(sheetName)
+    
 if __name__ == "__main__":
     ie=ImportExcel()
     ie.loadFiles()
-    print(ie.repos)
+
 

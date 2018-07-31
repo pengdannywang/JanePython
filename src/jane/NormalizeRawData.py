@@ -12,13 +12,13 @@ import pandas as pd
 class COLINDEX:
     mth=datetime.now().month
     NEXT_MONTH_NUM=mth+1
-    INDEX_A17 = 'a17'
-    INDEX_B18 = 'b18'
-    INDEX_F18 = 'f18'
-    INDEX_B19 = 'b19'
-    INDEX_F18VSB18 = 'f18VSb18'
-    INDEX_B19VSF18 = 'b19VSf18'
-    INDEX_F18VSA17 = 'f18VSa17'
+    INDEX_A17 = 'A17'
+    INDEX_B18 = 'B18'
+    INDEX_F18 = 'F18'
+    INDEX_B19 = 'B19'
+    INDEX_F18VSB18 = 'F18 vs. B18'
+    INDEX_B19VSF18 = 'B19 vs. F18'
+    INDEX_F18VSA17 = 'F18 vs. A17'
     INDEX_TYPE = 'type'
     INDEX_NAME = 'name'
     SORT_INDEXES= [INDEX_A17,INDEX_F18,INDEX_B18,INDEX_B19,INDEX_F18VSA17,INDEX_F18VSB18,INDEX_B19VSF18]
