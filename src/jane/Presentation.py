@@ -120,20 +120,20 @@ class Presentation(object):
     def writeToSheet(self,sheet,data,configPresentation):
         accounts=configPresentation[ci.CONFIG_ACCOUNT]
         sheet.clear()
-
-        sheet.add_rows(1)
-        sheet.append_row(data.columns.tolist())
-        
-            
-        for acc in accounts:
-            d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
-            if(~d.empty and len(d)>0):
-                sheet.append_row(d.iloc[0].tolist())
-            else:
-                sheet.append_row([acc])
-    
         row=1
         col=5
         for mon in ci.COLUMNS_WITHOUT_INDEXES:
             sheet.update_cell(row, col, mon)
             col=col+7
+
+        sheet.insert_row(data.columns.tolist(),2)
+        
+        row=3
+        for acc in accounts:
+            d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
+            if(~d.empty and len(d)>0):
+                sheet.insert_row(d.iloc[0].tolist(),row)
+            else:
+                sheet.insert_row([acc],row)
+            row=row+1
+    
