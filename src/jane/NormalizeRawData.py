@@ -23,30 +23,31 @@ class COLINDEX:
     INDEX_NAME = 'name'
     SORT_INDEXES= [INDEX_A17,INDEX_F18,INDEX_B18,INDEX_B19,INDEX_F18VSA17,INDEX_F18VSB18,INDEX_B19VSF18]
     
-    jan="01"
-    FEB="02"
-    MAR="03"
-    APR="04"
-    MAY="05"
-    JUN="06"
-    JUL="07"
-    AUG="08"
-    SEP="09"
-    OCT="10"
-    NOV="11"
-    DEC="12"
+    jan="Jan"
+    FEB="Feb"
+    MAR="Mar"
+    APR="Apr"
+    MAY="May"
+    JUN="Jun"
+    JUL="Jul"
+    AUG="Aug"
+    SEP="Sep"
+    OCT="Oct"
+    NOV="Nov"
+    DEC="Dec"
     COL_TOTAL = 'Total'
-    COL_MONTHLYAVERAGE = "monthly average"
+    COL_MONTHLYAVERAGE = "Monthly Average"
     COL_PAST_OF_YEAR="1 to "+str(mth)
     COL_FUTURE_OF_YEAR=str(datetime.now().month+1)+" To 12"
-    COL_SPRING = "1ST QUARTER"
-    COL_SUMMER="2ND QUARTER"
-    COL_AUTUMN="3RD QUARTER"
-    COL_WINTER="4ST QUARTER"
+    COL_SPRING = "1ST Quarter"
+    COL_SUMMER="2ND Quarter"
+    COL_AUTUMN="3RD Quarter"
+    COL_WINTER="4ST Quarter"
     ACCOUNT_NAME = 'accountsName'
 
     COLUMNS_INITIAL=[INDEX_NAME,jan,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC]
     COLUMNS_WITHOUT_INDEXES=[jan,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC,COL_TOTAL,COL_PAST_OF_YEAR,COL_FUTURE_OF_YEAR,COL_MONTHLYAVERAGE,COL_SPRING,COL_SUMMER,COL_AUTUMN,COL_WINTER]
+    
     COLUMNS_ALL=[INDEX_TYPE,INDEX_NAME]+COLUMNS_WITHOUT_INDEXES
     
     CONFIG_ACCOUNT='accounts'
@@ -62,12 +63,20 @@ class COLINDEX:
 def normalize(typeName,rawData):
     data=convertListListToDf(rawData)
     data=removeEmptyRow(data)
-    data= createRemainingCol(data)
     data.drop_duplicates(subset=COLINDEX.INDEX_NAME, keep='first', inplace=True)
+    data= createRemainingCol(data)
+    
     data=setIndexesByTypeAndName(typeName, data)
     return data      
 
-      
+def normalizeExcel(typeName,cells):
+    data=getDataFromCells(cells)
+    data=removeEmptyRow(data)
+    data.drop_duplicates(subset=COLINDEX.INDEX_NAME, keep='first', inplace=True)
+    data= createRemainingCol(data)
+    data=setIndexesByTypeAndName(typeName, data)
+    return data   
+       
 #create columns: "1 to month" "month to 12","monthly average","1st quarter" -"4th quarter"
 def createRemainingCol(rawDf):  
     rawDf[COLINDEX.COL_TOTAL]=rawDf.sum(axis=1)
@@ -96,6 +105,18 @@ def convertListListToDf(data):
                 arr.loc[len(arr)]=m
     return arr
 
+    
+def getDataFromCells(cells):
+    arr=pd.DataFrame(columns=COLINDEX.COLUMNS_INITIAL)
+    for i in range(len(cells)):
+            if(pd.isnull(cells[i][0].value)!=True and len(cells[i][0].value)>0):
+                if(validateList(cells[i])):
+                    acc=[cells[i][0].value]
+                    for j in range(1,13):
+                        mth=convertToNum(cells[i][j].value)
+                        acc.append(mth)
+                    arr.loc[len(arr)]=acc
+    return arr
 
 def setIndexesByTypeAndName(typeName,rawData):
     rawData[COLINDEX.INDEX_TYPE]=typeName
@@ -172,7 +193,7 @@ def validateList(row):
 
 
 def removeEmptyRow(df):
-    df= df[df['01']!=0 ]
+    df= df[df[COLINDEX.jan]!=0 ]
     df=df[df.name!='Currency: AUD']
     df=df[df.name!='name']
     return df
@@ -217,6 +238,13 @@ def removeEmptyRowForAccountList(accountList):
     accounts=accounts.drop(index=0,axis=0)
     return accounts
 
+def leanupExcelAccountTupleCells(accountTuples):
+    accounts=pd.DataFrame(columns=[COLINDEX.ACCOUNT_NAME])
+    for i in range(len(accountTuples)):
+        if(pd.isnull(accountTuples[i][0].value)!=True):
+            accounts.loc[len(accounts)]=accountTuples[i][0].value
+    
+    return accounts
 
 #create INDEX_B19,f18a17,f18b18 rows. generate indexes[type,INDEX_NAME]
 def generatef18a17(data):

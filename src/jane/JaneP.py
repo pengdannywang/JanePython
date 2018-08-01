@@ -23,7 +23,7 @@ class JaneP(object):
 
     def writeBackSheet(self):
         sheet= self.ie.getSheet("Sheet4")
-        self.pres.writeToSheet(sheet, self.prestationData, self.configPresentation)
+        self.ie.writeToSheet(sheet, self.prestationData, self.configPresentation)
         
 if __name__ == "__main__":
     jan=JaneP()

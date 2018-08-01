@@ -17,6 +17,10 @@ class ImportExcel(object):
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
+        self.loadSheet()
+        self.googleSpreadsheet()
+        
+    def loadSheet(self):
         # use creds to create row client to interact with the Google Drive API
         scope =  ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_name("E:/downloads/JaneProject-f472d80e0028.json", scope)
@@ -31,11 +35,9 @@ class ImportExcel(object):
         #sheet =gspread.Worksheet("entityConfig")
         #gspread.Client.open_by_key("AIzaSyBa1wrSY683ni4DHIuxNSJaLhuuxJA5XCI")
         # Extract and print all of the values
-        self.loadFiles()
-
-
         
-    def loadFiles(self):
+        
+    def googleSpreadsheet(self):
         for file in self.config1:
             
             #js=json.loads(str(file).strip('{}').replace("'", "\""))
@@ -106,8 +108,28 @@ class ImportExcel(object):
     def getSheet(self,sheetName):
         return self.co.worksheet(sheetName)
     
+    def writeToSheet(self,sheet,data,configPresentation):
+        accounts=configPresentation[ci.CONFIG_ACCOUNT]
+        sheet.clear()
+        row=1
+        col=5
+        for mon in ci.COLUMNS_WITHOUT_INDEXES:
+            sheet.update_cell(row, col, mon)
+            col=col+7
+
+        sheet.insert_row(data.columns.tolist(),2)
+        
+        row=3
+        for acc in accounts:
+            d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
+            if(~d.empty and len(d)>0):
+                sheet.insert_row(d.iloc[0].tolist(),row)
+            else:
+                sheet.insert_row([acc],row)
+            row=row+1
+            
 if __name__ == "__main__":
     ie=ImportExcel()
-    ie.loadFiles()
+    ie.googleSpreadsheet()
 
 
