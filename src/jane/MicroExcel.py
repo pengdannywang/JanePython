@@ -17,10 +17,11 @@ class MicroExcel(object):
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
-        self.loadSheet("U:/tools/jane/entityConfig.xlsx")
+
 
         
     def loadSheet(self,fileName):
+        self.fileName=fileName
         self.wb=openpyxl.load_workbook(fileName)
         self.entities=self.wb["entities"]
         config_cells=self.entities.__getitem__("A3:F100")
@@ -86,7 +87,7 @@ class MicroExcel(object):
         df=pd.DataFrame(columns=ci.CONFIG_COLUMNS)
         for i in range(1,len(pCells)):
             if(pd.isnull(pCells[i][0].value)!=True):
-                row=[pCells[i][0],pCells[i][1],pCells[i][2],pCells[i][3],pCells[i][4],pCells[i][5]]
+                row=[pCells[i][0].value,pCells[i][1].value,pCells[i][2].value,pCells[i][3].value,pCells[i][4].value,pCells[i][5].value]
                 df.loc[len(df)]=row
         return df
     
@@ -109,38 +110,45 @@ class MicroExcel(object):
     
     def getSheet(self,sheetName):
         sheetNames=self.wb.get_sheet_names()
-        if(sheetNames.sheets.__contains__(sheetName)):
+        if(sheetNames.__contains__(sheetName)):
             
             sheet=self.wb[sheetName]
-            sheet.get_named_range("A1:Q200")._cleanup()
-        else:
-            sheet=self.wb.create_sheet(title=sheetName)
+            self.wb.remove(sheet)
+           
+            
+        
+        sheet=self.wb.create_sheet(title=sheetName)
         return sheet
     
     def writeToSheet(self,sheet,data,configPresentation):
         accounts=configPresentation[ci.CONFIG_ACCOUNT]
-        sheet.clear()
+
         row=1
-        col=0
-        sheet.cell(1,col,ci.INDEX_NAME)
+        col=1
+        sheet.cell(row,col,ci.INDEX_NAME)
         col=col+4
         for mon in ci.COLUMNS_WITHOUT_INDEXES:
             sheet.cell(1,col,mon)
             sheet
             col=col+7
-        row=3
-        col=0
+        row=2
+        col=1
         for column in data.columns.tolist():
             sheet.cell(row,col,column)
-        
+            col=col+1
         row=4
         for acc in accounts:
             d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
             if(~d.empty and len(d)>0):
-                sheet.cell(d.iloc[0].tolist(),row)
+                for j in range(0,len(d.columns)):
+                    col=j+1
+                    sheet.cell(row,col,d.iloc[0][j])
             else:
-                sheet.insert_row([acc],row)
+                sheet.cell(row,1,acc)
             row=row+1 
+
+        self.wb.save(self.fileName)
+        
 if __name__ == "__main__":
     ie=MicroExcel()
     print(ie.repos)

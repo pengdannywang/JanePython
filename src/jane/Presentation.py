@@ -28,7 +28,7 @@ class Presentation(object):
     
     
     def getParents(self,presdf,level):
-        parents=(presdf.query(ci.CONFIG_LEVEL+"=='"+str(level)+"'"))[ci.CONFIG_ACCOUNT].unique()
+        parents=(presdf.query(ci.CONFIG_LEVEL+"=="+str(level)))[ci.CONFIG_ACCOUNT].unique()
         parents=list(filter(None,parents))
         return (parents)
     
@@ -68,7 +68,7 @@ class Presentation(object):
             for i in range(0,len(configPresentation)):
                 
     #             pre_value.loc[i][0]=configPresentation[ci.CONFIG_ACCOUNT].loc[i]
-                if(configPresentation[ci.CONFIG_LEVEL].loc[i]=='1'): 
+                if(configPresentation[ci.CONFIG_LEVEL].loc[i]==1): 
                     if( configPresentation[ci.CONFIG_PARENT].loc[i]==p):
                         pre_value.loc[len(pre_value)]=self.listRow(configPresentation[ci.CONFIG_ACCOUNT].loc[i],repos)
                 

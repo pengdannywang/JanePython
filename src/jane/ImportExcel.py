@@ -23,7 +23,8 @@ class ImportExcel(object):
     def loadSheet(self):
         # use creds to create row client to interact with the Google Drive API
         scope =  ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_name("E:/downloads/JaneProject-f472d80e0028.json", scope)
+        self.scedsFile="E:/downloads/JaneProject-f472d80e0028.json"
+        creds = ServiceAccountCredentials.from_json_keyfile_name(self.scedsFile, scope)
         self.client = gspread.authorize(creds)    
         # Find row workbook by name and open the first sheet
         # Make sure you use the right name here.
