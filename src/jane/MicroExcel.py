@@ -126,17 +126,18 @@ class MicroExcel(object):
         col=col+4
         for mon in ci.COLUMNS_WITHOUT_INDEXES:
             sheet.cell(1,col,mon)
+            sheet
             col=col+7
         row=3
         col=0
         for column in data.columns.tolist():
             sheet.cell(row,col,column)
         
-        row=3
+        row=4
         for acc in accounts:
             d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
             if(~d.empty and len(d)>0):
-                sheet.insert_row(d.iloc[0].tolist(),row)
+                sheet.cell(d.iloc[0].tolist(),row)
             else:
                 sheet.insert_row([acc],row)
             row=row+1 
