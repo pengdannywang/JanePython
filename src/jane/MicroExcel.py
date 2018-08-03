@@ -120,9 +120,9 @@ class MicroExcel(object):
         sheet=self.wb.create_sheet(title=sheetName)
         return sheet
     
-    def writeToSheet(self,sheet,data,configPresentation):
+    def writeToSheet(self,sheetName,data,configPresentation):
         accounts=configPresentation[ci.CONFIG_ACCOUNT]
-
+        sheet=self.getSheet(sheetName)
         row=1
         col=1
         sheet.cell(row,col,ci.INDEX_NAME)

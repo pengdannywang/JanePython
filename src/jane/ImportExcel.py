@@ -109,8 +109,9 @@ class ImportExcel(object):
     def getSheet(self,sheetName):
         return self.co.worksheet(sheetName)
     
-    def writeToSheet(self,sheet,data,configPresentation):
+    def writeToSheet(self,sheetName,data,configPresentation):
         accounts=configPresentation[ci.CONFIG_ACCOUNT]
+        sheet=self.getSheet(sheetName)
         sheet.clear()
         row=1
         col=5

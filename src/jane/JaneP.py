@@ -5,8 +5,7 @@ Created on 23 Jul. 2018
 '''
 
 from datetime import datetime
-import numpy as np
-import pandas as pd
+
 import sys, getopt
 from jane.MicroExcel import MicroExcel
 from jane.ImportExcel import ImportExcel
@@ -26,6 +25,7 @@ class JaneP(object):
         self.google=False
         self.fileName='U:/tools/jane/entityConfig.xlsx'
         self.outputName='sheet'
+        
     def doProcess(self):
         if(self.google):
             self.ie=ImportExcel()
@@ -35,8 +35,8 @@ class JaneP(object):
         self.repos=self.ie.repos
         self.configPresentation=self.ie.loadPresentation(self.presentationName)
         self.prestationData=self.pres.getAllAccounts(self.configPresentation, self.repos)
-        sheet= self.ie.getSheet(self.outputName)
-        self.ie.writeToSheet(sheet, self.prestationData, self.configPresentation)
+        
+        self.ie.writeToSheet(self.outputName, self.prestationData, self.configPresentation)
         
     def main(self,argv):
         
@@ -51,7 +51,7 @@ class JaneP(object):
             sys.exit(2)
         for opt, arg in opts:
             if opt == '-h':
-                print('Syntax: ' + sys.argv[0] + ' \n\n -h help.\n -g google Drive. \n -f file path and name.\n  -p presentation name.\n -o output path and file name.\n')
+                print('Syntax: ' + sys.argv[0] + ' \n\n -h help.\n -g google Drive. cres Path and Name \n -f file path and name.\n  -p presentation name.\n -o output path and file name.\n')
                 sys.exit()
             elif opt in ("-g", "-google"):
                 self.google=True
