@@ -138,8 +138,13 @@ class MicroExcel(object):
         sheet.cell(row,col,ci.INDEX_NAME)
         col=col+4
         for mon in ci.COLUMNS_WITHOUT_INDEXES:
+
+            
+            start_col=col-3
+            end_col=start_col+6
+            #cell=sheet.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
             sheet.cell(1,col,mon)
-            sheet
+            cell=mon
             col=col+7
         # print sub Head as A17,B18...
         row=2
