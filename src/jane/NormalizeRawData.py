@@ -21,7 +21,9 @@ class COLINDEX:
     INDEX_F18VSA17 = 'F18 vs. A17'
     INDEX_TYPE = 'type'
     INDEX_NAME = 'name'
-    SORT_INDEXES= [INDEX_A17,INDEX_F18,INDEX_B18,INDEX_B19,INDEX_F18VSA17,INDEX_F18VSB18,INDEX_B19VSF18]
+    INDEX_PERCENTAGES=[INDEX_F18VSA17,INDEX_F18VSB18,INDEX_B19VSF18]
+    SORT_INDEXES= [INDEX_A17,INDEX_F18,INDEX_B18,INDEX_B19]+INDEX_PERCENTAGES
+    
     
     jan="Jan"
     FEB="Feb"
@@ -249,7 +251,7 @@ def leanupExcelAccountTupleCells(accountTuples):
 #create INDEX_B19,f18a17,f18b18 rows. generate indexes[type,INDEX_NAME]
 def generatef18a17(data):
     #f18a17=(p-a)/a 
-    f18a17=(data.loc[COLINDEX.INDEX_A17]-data.loc[COLINDEX.INDEX_B18]).div(data.loc[COLINDEX.INDEX_B18]).fillna(0).replace([np.inf,-np.inf],0)*100
+    f18a17=(data.loc[COLINDEX.INDEX_A17]-data.loc[COLINDEX.INDEX_B18]).div(data.loc[COLINDEX.INDEX_B18]).fillna(0).replace([np.inf,-np.inf],0)
     f18a17[COLINDEX.INDEX_TYPE]=COLINDEX.INDEX_F18VSA17
     f18a17.reset_index(inplace=True)
     f18a17.set_index([COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME],inplace=True)

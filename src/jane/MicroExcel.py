@@ -156,7 +156,10 @@ class MicroExcel(object):
                 sheet.cell(row,1,d.iloc[0][0])
                 for j in range(1,len(d.columns)):
                     col=j+1
-                    sheet.cell(row,col,"{:,.0f}".format(d.iloc[0][j]))
+                    if(d.columns[j] in ci.INDEX_PERCENTAGES):
+                        sheet.cell(row,col,"{:1.0%}".format(d.iloc[0][j]))
+                    else:
+                        sheet.cell(row,col,"{:,.0f}".format(d.iloc[0][j]))
             else:
                 
                 if(t[1][ci.CONFIG_LEVEL]==10):
