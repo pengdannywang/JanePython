@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         print(self.ie.repos.loc['a17'].div(self.ie.repos.loc['b18']))
     @unittest.skip
     def testSheetName(self):
-        plds=self.ie.loadPresentation('interface1')
+        plds=self.ie.loadTemplate('interface1')
         df=pd.DataFrame(columns=['accounts','parent','level','percentages','formula'])
         for i in range(1,len(plds)):
             row=[plds[i][0],plds[i][1],plds[i][2],plds[i][3],plds[i][4]]

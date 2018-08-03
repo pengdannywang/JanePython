@@ -17,28 +17,31 @@ class ImportExcel(object):
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
-        self.loadSheet()
-        self.googleSpreadsheet()
+        self.fileName='entityConfig'
+        self.scedsFile="E:/downloads/JaneProject-f472d80e0028.json"
+        self.sheetName="interface1"
+     
         
-    def loadSheet(self):
+    def loadSheet(self,fileName):
+        self.fileName=fileName
         # use creds to create row client to interact with the Google Drive API
         scope =  ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
-        self.scedsFile="E:/downloads/JaneProject-f472d80e0028.json"
+        
         creds = ServiceAccountCredentials.from_json_keyfile_name(self.scedsFile, scope)
         self.client = gspread.authorize(creds)    
         # Find row workbook by name and open the first sheet
         # Make sure you use the right name here.
         #sheet = client.open_by_key("AIzaSyBa1wrSY683ni4DHIuxNSJaLhuuxJA5XCI").sheet1
-        self.co=self.client.open("entityConfig")
+        self.co=self.client.open(self.fileName)
         self.config1 = self.co.worksheet("entities").get_all_records(head=2)
         self.accountList=self.co.worksheet("accounts").get_all_values()
         self.accountList=nrd.removeEmptyRowForAccountList(self.accountList)
         #sheet =gspread.Worksheet("entityConfig")
         #gspread.Client.open_by_key("AIzaSyBa1wrSY683ni4DHIuxNSJaLhuuxJA5XCI")
         # Extract and print all of the values
+        self.repos=self.getRepos()
         
-        
-    def googleSpreadsheet(self):
+    def getRepos(self):
         for file in self.config1:
             
             #js=json.loads(str(file).strip('{}').replace("'", "\""))
@@ -78,10 +81,10 @@ class ImportExcel(object):
             self.actualDf=nrd.reduceRepositoryByAccounts(self.actualDf, self.accountList)
             self.priorDf=nrd.reduceRepositoryByAccounts(self.priorDf, self.accountList)
             self.b19=nrd.generateB19(self.budgetDf)
-            self.generateRepos()
+            return self.generateRepos()
 
     
-    def loadPresentation(self,sheetName):
+    def loadTemplate(self,sheetName):
         presentListlists = self.co.worksheet(sheetName).get_all_values()
         df=pd.DataFrame(columns=ci.CONFIG_COLUMNS)
         for i in range(1,len(presentListlists)):
@@ -95,22 +98,23 @@ class ImportExcel(object):
     
     
     def generateRepos(self):
-        self.repos=pd.DataFrame()
-        self.repos=self.repos.append(self.priorDf)
-        self.repos=self.repos.append(self.actualDf)
-        self.repos=self.repos.append(self.budgetDf)
-        self.repos=self.repos.append(self.b19)
+        repos=pd.DataFrame()
+        repos=repos.append(self.priorDf)
+        repos=repos.append(self.actualDf)
+        repos=repos.append(self.budgetDf)
+        repos=repos.append(self.b19)
         # ensure repos don't have nan value in order to exception 
-        self.repos=self.repos.replace(np.NaN,0)
-        self.repos=self.repos.append(nrd.generatef18a17(self.repos))
-        self.repos=self.repos.append(nrd.generatef18b18(self.repos))
-        self.repos=self.repos.append(nrd.generateb19f18(self.repos))
+        repos=repos.replace(np.NaN,0)
+        repos=repos.append(nrd.generatef18a17(repos))
+        repos=repos.append(nrd.generatef18b18(repos))
+        repos=repos.append(nrd.generateb19f18(repos))
+        return repos
     
     def getSheet(self,sheetName):
         return self.co.worksheet(sheetName)
     
-    def writeToSheet(self,sheetName,data,configPresentation):
-        accounts=configPresentation[ci.CONFIG_ACCOUNT]
+    def writeToSheet(self,sheetName,outputData,template):
+        accounts=template[ci.CONFIG_ACCOUNT]
         sheet=self.getSheet(sheetName)
         sheet.clear()
         row=1
@@ -119,11 +123,11 @@ class ImportExcel(object):
             sheet.update_cell(row, col, mon)
             col=col+7
 
-        sheet.insert_row(data.columns.tolist(),2)
+        sheet.insert_row(outputData.columns.tolist(),2)
         
         row=3
         for acc in accounts:
-            d=data.query(ci.INDEX_NAME+"=='"+acc+"'")
+            d=outputData.query(ci.INDEX_NAME+"=='"+acc+"'")
             if(~d.empty and len(d)>0):
                 sheet.insert_row(d.iloc[0].tolist(),row)
             else:
@@ -132,6 +136,6 @@ class ImportExcel(object):
             
 if __name__ == "__main__":
     ie=ImportExcel()
-    ie.googleSpreadsheet()
+    ie.loadSheet(ie.fileName)
 
 

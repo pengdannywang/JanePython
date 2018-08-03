@@ -9,7 +9,7 @@ from datetime import datetime
 import sys, getopt
 from jane.MicroExcel import MicroExcel
 from jane.ImportExcel import ImportExcel
-from jane.Presentation import Presentation
+from jane.Presentation import Template
 
 class JaneP(object):
     
@@ -17,10 +17,10 @@ class JaneP(object):
         self.mth=datetime.now().month
         
         
-        self.presentationName='interface1'
+        self.sheetName='interface1'
         
-        self.pres=Presentation()
-        # pres.getAllAccounts(configPresentation, self.repos)
+        self.pres=Template()
+        # pres.getAllAccounts(template, self.repos)
         self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google=False
         self.fileName='U:/tools/jane/entityConfig.xlsx'
@@ -33,10 +33,10 @@ class JaneP(object):
             self.ie=MicroExcel()
         self.ie.loadSheet(self.fileName)
         self.repos=self.ie.repos
-        self.configPresentation=self.ie.loadPresentation(self.presentationName)
-        self.prestationData=self.pres.getAllAccounts(self.configPresentation, self.repos)
+        self.template=self.ie.loadTemplate(self.sheetName)
+        self.outputData=self.pres.getAllAccounts(self.template, self.repos)
         
-        self.ie.writeToSheet(self.outputName, self.prestationData, self.configPresentation)
+        self.ie.writeToSheet(self.outputName, self.outputData, self.template)
         
     def main(self,argv):
         
@@ -59,10 +59,10 @@ class JaneP(object):
             elif opt in ("-f","-file"):
                 self.fileName=arg
             elif opt in ("-p","-presentation"):
-                self.presentationName=arg.lower()
+                self.sheetName=arg.lower()
             elif opt in ("-o","-output"):
                 self.outputName=arg
-        
+            
         self.doProcess()
 
 if __name__ == "__main__":
