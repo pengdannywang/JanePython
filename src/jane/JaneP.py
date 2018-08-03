@@ -9,7 +9,7 @@ from datetime import datetime
 import sys, getopt
 from jane.MicroExcel import MicroExcel
 from jane.ImportExcel import ImportExcel
-from jane.Presentation import Template
+from jane.Template import Template
 
 class JaneP(object):
     

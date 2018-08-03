@@ -10,6 +10,7 @@ import jane.NormalizeRawData as nrd
 from jane.NormalizeRawData import COLINDEX as ci
 import pandas as pd
 import numpy as np
+from jane.Template import Template
 
 class MicroExcel(object):
 
@@ -18,7 +19,7 @@ class MicroExcel(object):
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
         self.fileName='U:/tools/jane/entityConfig.xlsx'
-        
+        self.template=Template()
 
         
     def loadSheet(self,fileName):
@@ -73,7 +74,8 @@ class MicroExcel(object):
                         self.priorDf=self.priorDf+priorDf
                     else:
                         self.priorDf=priorDf
-                if(b19N!=''):
+               
+                if(pd.isnull(b19N)!=True):
                     b19sheet=wb2[b19N]
                     cells=b19sheet.__getitem__(sheetRange)
                     b19Df=nrd.normalizeExcel(ci.INDEX_B19,cells)
@@ -82,7 +84,7 @@ class MicroExcel(object):
         self.actualDf=nrd.reduceRepositoryByAccounts(self.actualDf, self.accountList)
         self.priorDf=nrd.reduceRepositoryByAccounts(self.priorDf, self.accountList)
         #b19 is from different files. if it is empty, then set it to zero 
-        if(pd.isnull(b19Df)!=True):
+        if(pd.isnull(b19N)!=True):
             self.b19=nrd.reduceRepositoryByAccounts(b19Df, self.accountList)
         else:
             self.b19=nrd.generateB19(self.budgetDf)
@@ -128,8 +130,9 @@ class MicroExcel(object):
         return sheet
     
     def writeToSheet(self,sheetName,outputData,template):
-        accounts=template[ci.CONFIG_ACCOUNT]
+        
         sheet=self.getSheet(sheetName)
+        #print head months
         row=1
         col=1
         sheet.cell(row,col,ci.INDEX_NAME)
@@ -138,20 +141,35 @@ class MicroExcel(object):
             sheet.cell(1,col,mon)
             sheet
             col=col+7
+        # print sub Head as A17,B18...
         row=2
         col=1
         for column in outputData.columns.tolist():
             sheet.cell(row,col,column)
             col=col+1
+        # a blank line 
+        # print data
         row=4
-        for acc in accounts:
-            d=outputData.query(ci.INDEX_NAME+"=='"+acc+"'")
+        for t in template.iterrows():
+            d=outputData.query(ci.INDEX_NAME+"=='"+t[1][ci.CONFIG_ACCOUNT]+"'")
             if(~d.empty and len(d)>0):
-                for j in range(0,len(d.columns)):
+                sheet.cell(row,1,d.iloc[0][0])
+                for j in range(1,len(d.columns)):
                     col=j+1
-                    sheet.cell(row,col,d.iloc[0][j])
+                    sheet.cell(row,col,"{:,.0f}".format(d.iloc[0][j]))
             else:
-                sheet.cell(row,1,acc)
+                
+                if(t[1][ci.CONFIG_LEVEL]==10):
+                    percent=self.template.getPercentages(t[1][ci.CONFIG_ACCOUNT], t[1][ci.CONFIG_PRECENTAGES], t[1][ci.CONFIG_DENOMINATOR], outputData)
+                    sheet.cell(row,1,percent.iloc[0][0])
+                    for j in range(1,len(percent.columns)):
+                        col=j+1
+                        #format to %
+
+                        sheet.cell(row,col,"{:1.0%}".format(percent.iloc[0][j]))
+                        
+                else:
+                    sheet.cell(row,1,t[1][ci.CONFIG_ACCOUNT])
             row=row+1 
 
         self.wb.save(self.fileName)
