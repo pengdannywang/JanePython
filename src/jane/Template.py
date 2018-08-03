@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 from jane.NormalizeRawData import COLINDEX as ci
 from gspread import Worksheet as sheet
-class Presentation(object):
+class Template(object):
     
     def __init__(self):
         '''
