@@ -21,31 +21,31 @@ class JaneP(object):
         
         self.pres=Template()
         # pres.getAllAccounts(template, self.repos)
-        self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
+        self.google_cres="/Users/pengwang/Downloads/JaneProject-614aeb27e1fc.json"
         self.google=False
-        self.fileName='U:/tools/jane/entityConfig.xlsx'
-        self.outputName='sheet'
+
+
         
     def doProcess(self):
         if(self.google):
             self.ie=ImportExcel()
         else:
             self.ie=MicroExcel()
-        self.ie.loadSheet(self.fileName)
+        self.ie.loadSheet(self.ie.fileName)
         self.repos=self.ie.repos
         self.template=self.ie.loadTemplate(self.sheetName)
         self.outputData=self.pres.getAllAccounts(self.template, self.repos)
         
-        self.ie.writeToSheet(self.outputName, self.outputData, self.template)
+        self.ie.writeToSheet( self.outputData, self.template)
         
     def main(self,argv):
         
-        if argv == []:
-            print("Usage: " + sys.argv[0] + " -h for help")
-            return
+        #if argv == []:
+        #   print("Usage: " + sys.argv[0] + " -h for help")
+            #return
         try:
             # opts, args = getopt.getopt(argv,"hf:o:",["ifile=","ofile="])
-            opts, args = getopt.getopt(argv, "hg:f:p:o:", ["help","google Drive","file=","presentation=","output="])
+            opts, args = getopt.getopt(argv, "hg:f:t:o:", ["help","google Drive","file=","template=","output="])
         except getopt.GetoptError:
             print("Usage: " + sys.argv[0] + " -h for help")
             sys.exit(2)
@@ -57,11 +57,11 @@ class JaneP(object):
                 self.google=True
                 self.google_cres=arg
             elif opt in ("-f","-file"):
-                self.fileName=arg
-            elif opt in ("-p","-presentation"):
-                self.sheetName=arg.lower()
+                self.ie.fileName=arg
+            elif opt in ("-t","-template"):
+                self.ie.sheetName=arg.lower()
             elif opt in ("-o","-output"):
-                self.outputName=arg
+                self.ie.outputName=arg
             
         self.doProcess()
 

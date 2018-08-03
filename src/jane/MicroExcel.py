@@ -18,9 +18,10 @@ class MicroExcel(object):
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
-        self.fileName='U:/tools/jane/entityConfig.xlsx'
+        self.fileName='/Users/pengwang/Downloads/entityConfig.xlsx'
+        self.outputFile='/Users/pengwang/Downloads/report.xlsx'
         self.template=Template()
-
+        self.outputSheetName="Sheet"
         
     def loadSheet(self,fileName):
         self.fileName=fileName
@@ -119,33 +120,23 @@ class MicroExcel(object):
         repos=repos.append(nrd.generateb19f18(repos))
         return repos
     
-    def getSheet(self,sheetName):
-        sheetNames=self.wb.get_sheet_names()
-        if(sheetNames.__contains__(sheetName)):
-            
-            sheet=self.wb[sheetName]
-            self.wb.remove(sheet)
-           
-        sheet=self.wb.create_sheet(title=sheetName)
-        return sheet
-    
-    def writeToSheet(self,sheetName,outputData,template):
         
-        sheet=self.getSheet(sheetName)
+    
+    def writeToSheet(self,outputData,template):
+        self.workbook=openpyxl.Workbook()
+        sheet=self.workbook.create_sheet()
         #print head months
         row=1
         col=1
         sheet.cell(row,col,ci.INDEX_NAME)
-        col=col+4
+        col=col+1
         for mon in ci.COLUMNS_WITHOUT_INDEXES:
-
             
-            start_col=col-3
-            end_col=start_col+6
-            #cell=sheet.merge_cells(start_row=row, start_column=start_col, end_row=row, end_column=end_col)
+            end_col=col+6
+            sheet.merge_cells(start_row=row, start_column=col, end_row=row, end_column=end_col)
             sheet.cell(1,col,mon)
-            cell=mon
-            col=col+7
+            col=end_col+1
+           
         # print sub Head as A17,B18...
         row=2
         col=1
@@ -156,6 +147,7 @@ class MicroExcel(object):
         # print data
         row=4
         for t in template.iterrows():
+           
             d=outputData.query(ci.INDEX_NAME+"=='"+t[1][ci.CONFIG_ACCOUNT]+"'")
             if(~d.empty and len(d)>0):
                 sheet.cell(row,1,d.iloc[0][0])
@@ -180,8 +172,9 @@ class MicroExcel(object):
                     sheet.cell(row,1,t[1][ci.CONFIG_ACCOUNT])
             row=row+1 
 
-        self.wb.save(self.fileName)
-        
+        #self.wb.save(self.fileName)
+
+        self.workbook.save(self.outputFile)
 if __name__ == "__main__":
     ie=MicroExcel()
     ie.loadSheet(ie.fileName)

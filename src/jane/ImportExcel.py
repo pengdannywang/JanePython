@@ -20,6 +20,7 @@ class ImportExcel(object):
         self.fileName='entityConfig'
         self.scedsFile="E:/downloads/JaneProject-f472d80e0028.json"
         self.sheetName="interface1"
+        self.outputSheetName="Sheet"
      
         
     def loadSheet(self,fileName):
@@ -113,9 +114,9 @@ class ImportExcel(object):
     def getSheet(self,sheetName):
         return self.co.worksheet(sheetName)
     
-    def writeToSheet(self,sheetName,outputData,template):
+    def writeToSheet(self,outputData,template):
         accounts=template[ci.CONFIG_ACCOUNT]
-        sheet=self.getSheet(sheetName)
+        sheet=self.getSheet(self.outputSheetName)
         sheet.clear()
         row=1
         col=5
