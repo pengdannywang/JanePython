@@ -6,6 +6,7 @@ Created on 24Jul.,2018
 '''
 from oauth2client.service_account import ServiceAccountCredentials
 import openpyxl
+from openpyxl.styles import Font, Fill
 import jane.NormalizeRawData as nrd
 from jane.NormalizeRawData import COLINDEX as ci
 import pandas as pd
@@ -147,9 +148,10 @@ class MicroExcel(object):
         # print data
         row=4
         for t in template.iterrows():
-           
+
             d=outputData.query(ci.INDEX_NAME+"=='"+t[1][ci.CONFIG_ACCOUNT]+"'")
             if(~d.empty and len(d)>0):
+                # template row is not percentages of other row
                 sheet.cell(row,1,d.iloc[0][0])
                 for j in range(1,len(d.columns)):
                     col=j+1
@@ -170,6 +172,9 @@ class MicroExcel(object):
                         
                 else:
                     sheet.cell(row,1,t[1][ci.CONFIG_ACCOUNT])
+#             if(t[1][ci.CONFIG_LEVEL!='1']):
+#                 rowA=sheet.row_dimensions[row]
+#                 rowA.font=Font(b="border")
             row=row+1 
 
         #self.wb.save(self.fileName)
