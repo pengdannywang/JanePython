@@ -11,6 +11,7 @@ import jane.NormalizeRawData as nrd
 from jane.NormalizeRawData import COLINDEX as ci
 import pandas as pd
 import numpy as np
+import os
 from jane.Template import Template
 
 class MicroExcel(object):
@@ -19,13 +20,12 @@ class MicroExcel(object):
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
-        self.fileName='/Users/pengwang/Downloads/entityConfig.xlsx'
-        self.outputFile='/Users/pengwang/Downloads/report.xlsx'
+
         self.template=Template()
-        self.outputSheetName="Sheet"
+
         
     def loadSheet(self,fileName):
-        self.fileName=fileName
+        
         self.wb=openpyxl.load_workbook(fileName)
         self.entities=self.wb["entities"]
         config_cells=self.entities.__getitem__("A3:F100")
@@ -122,10 +122,16 @@ class MicroExcel(object):
         return repos
     
         
-    
-    def writeToSheet(self,outputData,template):
-        self.workbook=openpyxl.Workbook()
-        sheet=self.workbook.create_sheet()
+    def getSheet(self,outputFile):
+        if(os.path.isfile(outputFile)):
+            self.workbook=openpyxl.load_workbook(outputFile)
+        else:
+            self.workbook=openpyxl.Workbook()
+            
+    def writeToSheet(self,outputFile,sheetName,outputData,template):
+        self.getSheet(outputFile)
+        sheet=self.workbook.create_sheet(title=sheetName)
+        
         #print head months
         row=1
         col=1
@@ -179,7 +185,7 @@ class MicroExcel(object):
 
         #self.wb.save(self.fileName)
 
-        self.workbook.save(self.outputFile)
+        self.workbook.save(outputFile)
 if __name__ == "__main__":
     ie=MicroExcel()
     ie.loadSheet(ie.fileName)

@@ -11,24 +11,22 @@ from jane.NormalizeRawData import COLINDEX as ci
 import pandas as pd
 import numpy as np
 
-class ImportExcel(object):
+class GoogleExcel(object):
 
     def __init__(self):
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
         self.fileName='entityConfig'
-        self.scedsFile="E:/downloads/JaneProject-f472d80e0028.json"
         self.sheetName="interface1"
-        self.outputSheetName="Sheet"
      
         
-    def loadSheet(self,fileName):
-        self.fileName=fileName
+    def loadSheet(self,scedsFile):
+
         # use creds to create row client to interact with the Google Drive API
         scope =  ['https://spreadsheets.google.com/feeds' + ' ' +'https://www.googleapis.com/auth/drive']
         
-        creds = ServiceAccountCredentials.from_json_keyfile_name(self.scedsFile, scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name(scedsFile, scope)
         self.client = gspread.authorize(creds)    
         # Find row workbook by name and open the first sheet
         # Make sure you use the right name here.
@@ -114,9 +112,9 @@ class ImportExcel(object):
     def getSheet(self,sheetName):
         return self.co.worksheet(sheetName)
     
-    def writeToSheet(self,outputData,template):
-        accounts=template[ci.CONFIG_ACCOUNT]
-        sheet=self.getSheet(self.outputSheetName)
+    def writeToSheet(self,fName,sheetName,outputData,template):
+
+        sheet=self.getSheet(sheetName)
         sheet.clear()
         row=1
         col=5
@@ -126,17 +124,21 @@ class ImportExcel(object):
 
         sheet.insert_row(outputData.columns.tolist(),2)
         
-        row=3
-        for acc in accounts:
-            d=outputData.query(ci.INDEX_NAME+"=='"+acc+"'")
+        row=4
+        for t in template.iterrows():
+
+            d=outputData.query(ci.INDEX_NAME+"=='"+t[1][ci.CONFIG_ACCOUNT]+"'")
             if(~d.empty and len(d)>0):
                 sheet.insert_row(d.iloc[0].tolist(),row)
             else:
-                sheet.insert_row([acc],row)
+                sheet.insert_row([t[1][ci.CONFIG_ACCOUNT]],row)
             row=row+1
-            
+ 
+  
+      
+
 if __name__ == "__main__":
-    ie=ImportExcel()
+    ie=GoogleExcel()
     ie.loadSheet(ie.fileName)
 
 
