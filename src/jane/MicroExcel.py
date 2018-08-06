@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import os
 from jane.Template import Template
+from _overlapped import NULL
 
 class MicroExcel(object):
 
@@ -32,9 +33,9 @@ class MicroExcel(object):
 
         
     def loadSheet(self,fileName):
-        budgetDf=pd.DataFrame()
-        actualDf=pd.DataFrame()
-        priorDf=pd.DataFrame()
+        budgetDf=NULL
+        actualDf=NULL
+        priorDf=NULL
         self.wb=openpyxl.load_workbook(fileName)
         self.entities=self.wb[self.CONFIG_SHEET_ENTITIES]
         config_cells=self.entities.__getitem__("A3:F200")
@@ -61,7 +62,7 @@ class MicroExcel(object):
                     cells=budgetSheets.__getitem__(sheetRange)
                     budgetDf1=nrd.normalizeExcel(ci.INDEX_F18,cells)
                     #budgetDf=nrd.reduceRepositoryByAccounts(budgetDf, self.accountList)
-                    if(not budgetDf1.empty):
+                    if(~pd.isnull(budgetDf)):
                         budgetDf=budgetDf+budgetDf1
                     else:
                         budgetDf=budgetDf1
@@ -72,7 +73,7 @@ class MicroExcel(object):
                     cells=actualSheet.__getitem__(sheetRange)
                     actualDf1=nrd.normalizeExcel(ci.INDEX_B18,cells)
                     #actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
-                    if(not actualDf.empty):
+                    if(~pd.isnull(actualDf)):
                         actualDf=actualDf+actualDf1
                     else:
                         actualDf=actualDf1
@@ -82,7 +83,7 @@ class MicroExcel(object):
                     cells=priorSheet.__getitem__(sheetRange)
                     priorDf1=nrd.normalizeExcel(ci.INDEX_A17,cells)
                     #priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
-                    if(not priorDf.empty):
+                    if(~pd.isnull(priorDf)):
                         priorDf=priorDf+priorDf1
                     else:
                         priorDf=priorDf1
