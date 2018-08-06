@@ -23,10 +23,10 @@ class JaneP(object):
         # pres.getAllAccounts(template, self.repos)
         self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google=False
-        self.fileName='U:/tools/jane/entityConfig.xlsx'
-        
+        #self.fileName='U:/tools/jane/entityConfig.xlsx'
+        self.fileName='/Users/pengwang/Downloads/entityConfig.xlsx'
         self.googleFile='entityConfig'
-        self.outputFile='U:/tools/jane/output.xlsx'
+        self.outputFile='/Users/pengwang/Downloads/output.xlsx'
     def doProcess(self):
         if(self.google):
             self.io=GoogleExcel()

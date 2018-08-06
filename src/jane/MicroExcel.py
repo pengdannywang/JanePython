@@ -37,10 +37,10 @@ class MicroExcel(object):
         
         self.wb=openpyxl.load_workbook(fileName)
         self.entities=self.wb[self.CONFIG_SHEET_ENTITIES]
-        config_cells=self.entities.__getitem__("A3:F100")
+        config_cells=self.entities.__getitem__("A3:F200")
         accountSheet=self.wb[self.CONFIG_SHEET_ACCOUNTS]
         self.templates=self.wb[self.CONFIG_SHEET_TEMPLATES]
-        config_account_cells=accountSheet.__getitem__("A2:A160")
+        config_account_cells=accountSheet.__getitem__("A2:A200")
         self.accountList=nrd.leanupExcelAccountTupleCells(config_account_cells)
         for i in range(len(config_cells)):
             
@@ -134,13 +134,13 @@ class MicroExcel(object):
         
     def getSheet(self,outputFile):
         if(os.path.isfile(outputFile)):
-            self.workbook=openpyxl.load_workbook(outputFile)
+            self.workbook=openpyxl.load_workbook(outputFile) #load old booksheet
         else:
-            self.workbook=openpyxl.Workbook()
+            self.workbook=openpyxl.Workbook()#create new workbook
             
     def printTemplates(self,outputData,template):
-        templateDFs=pd.DataFrame(self.templates.values)
-        for i in range(1,len(templateDFs)):
+        templateDFs=pd.DataFrame(self.templates.values) # convert worksheets to dataFrame structure
+        for i in range(1,len(templateDFs)): #loop all templates
             path=templateDFs.iloc[i][0]
             fileName=path+templateDFs.iloc[i][1]
             sheet=templateDFs.iloc[i][2]
