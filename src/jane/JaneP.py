@@ -21,12 +21,12 @@ class JaneP(object):
         
         self.pres=Template()
         # pres.getAllAccounts(template, self.repos)
-        self.google_cres="/Users/pengwang/Downloads/JaneProject-614aeb27e1fc.json"
+        self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google=False
-        self.fileName='/Users/pengwang/Downloads/entityConfig.xlsx'
-        self.outputFile='/Users/pengwang/Downloads/report.xlsx'
-
+        self.fileName='U:/tools/jane/entityConfig.xlsx'
         
+        self.googleFile='entityConfig'
+        self.outputFile='U:/tools/jane/output.xlsx'
     def doProcess(self):
         if(self.google):
             self.io=GoogleExcel()
@@ -38,8 +38,10 @@ class JaneP(object):
         self.template=self.io.loadTemplate(self.sheetName)
         self.outputData=self.pres.getAllAccounts(self.template, self.repos)
         
-        self.io.writeToSheet( self.outputFile,self.sheetName,self.outputData, self.template)
+        #self.io.writeToSheet(self.outputFile, self.sheetName,self.outputData, self.template)
+        self.io.printTemplates(self.outputData,self.template)
         
+
     def main(self,argv):
         
         #if argv == []:

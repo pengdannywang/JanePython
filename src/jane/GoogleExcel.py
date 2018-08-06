@@ -18,8 +18,14 @@ class GoogleExcel(object):
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
         self.fileName='entityConfig'
+        self.CONFIG_SHEET_ENTITIES = "entities"
+        self.CONFIG_SHEET_ACCOUNTS = "accounts"
+        self.CONFIG_SHEET_TEMPLATES='templates'
         self.sheetName="interface1"
-     
+        self.CONFIG_ENTITIES_FILENAME = 'fileName'
+        self.CONFIG_ENTITIES_BUDGET = 'BUDGET'
+        self.CONFIG_ENTITIES_ACTUAL = 'ACTUAL'
+        self.CONFIG_ENTITIES_PRIOR = 'PRIOR'
         
     def loadSheet(self,scedsFile):
 
@@ -32,9 +38,12 @@ class GoogleExcel(object):
         # Make sure you use the right name here.
         #sheet = client.open_by_key("AIzaSyBa1wrSY683ni4DHIuxNSJaLhuuxJA5XCI").sheet1
         self.co=self.client.open(self.fileName)
-        self.config1 = self.co.worksheet("entities").get_all_records(head=2)
-        self.accountList=self.co.worksheet("accounts").get_all_values()
+        
+        self.config1 = self.co.worksheet(self.CONFIG_SHEET_ENTITIES).get_all_records(head=2)
+        self.templates=self.co.worksheet(self.CONFIG_SHEET_TEMPLATES).get_all_values()
+        self.accountList=self.co.worksheet(self.CONFIG_SHEET_ACCOUNTS).get_all_values()
         self.accountList=nrd.removeEmptyRowForAccountList(self.accountList)
+        
         #sheet =gspread.Worksheet("entityConfig")
         #gspread.Client.open_by_key("AIzaSyBa1wrSY683ni4DHIuxNSJaLhuuxJA5XCI")
         # Extract and print all of the values
@@ -44,10 +53,14 @@ class GoogleExcel(object):
         for file in self.config1:
             
             #js=json.loads(str(file).strip('{}').replace("'", "\""))
-            fileName=file.get('fileName')
-            budgetN=file.get('BUDGET')
-            actualN=file.get('ACTUAL')
-            priorN=file.get('PRIOR')
+            
+            fileName=file.get(self.CONFIG_ENTITIES_FILENAME )
+            
+            budgetN=file.get(self.CONFIG_ENTITIES_BUDGET)
+            
+            actualN=file.get(self.CONFIG_ENTITIES_ACTUAL)
+           
+            priorN=file.get(self.CONFIG_ENTITIES_PRIOR)
             co = self.client.open(fileName)
             if(budgetN!=''):
                 rawBudget=co.worksheet(budgetN).get_all_values()
@@ -110,7 +123,15 @@ class GoogleExcel(object):
         return repos
     
     def getSheet(self,sheetName):
-        return self.co.worksheet(sheetName)
+        name="output_"+sheetName
+        sheets=self.co.worksheets()
+        for sheet in sheets:
+            if sheet.title==name :
+               
+                return sheet
+        
+                
+        return self.co.add_worksheet(name,200,200)
     
     def writeToSheet(self,fName,sheetName,outputData,template):
 
@@ -125,16 +146,22 @@ class GoogleExcel(object):
         sheet.insert_row(outputData.columns.tolist(),2)
         
         row=4
-        for t in template.iterrows():
+        for i in range(len(template)):
 
-            d=outputData.query(ci.INDEX_NAME+"=='"+t[1][ci.CONFIG_ACCOUNT]+"'")
+            d=outputData.query(ci.INDEX_NAME+"=='"+template.iloc[i][1]+"'")
             if(~d.empty and len(d)>0):
                 sheet.insert_row(d.iloc[0].tolist(),row)
             else:
-                sheet.insert_row([t[1][ci.CONFIG_ACCOUNT]],row)
+                sheet.insert_row(template.iloc[i][1],row)
             row=row+1
  
-  
+    def printTemplates(self,outputData,template):
+        for i in range(1,len(self.templates)):
+            path=self.templates[i][0]
+            fileName=path+self.templates[i][1]
+            sheet=self.templates[i][2]
+           
+            self.writeToSheet(fileName, sheet,outputData, template)  
       
 
 if __name__ == "__main__":

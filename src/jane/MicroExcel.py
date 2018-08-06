@@ -7,6 +7,7 @@ Created on 24Jul.,2018
 from oauth2client.service_account import ServiceAccountCredentials
 import openpyxl
 from openpyxl.styles import Font, Fill
+from openpyxl.utils.dataframe import dataframe_to_rows 
 import jane.NormalizeRawData as nrd
 from jane.NormalizeRawData import COLINDEX as ci
 import pandas as pd
@@ -17,6 +18,14 @@ from jane.Template import Template
 class MicroExcel(object):
 
     def __init__(self):
+        self.CONFIG_SHEET_ENTITIES = "entities"
+        self.CONFIG_SHEET_ACCOUNTS = "accounts"
+        self.CONFIG_SHEET_TEMPLATES='templates'
+        self.sheetName="interface1"
+        self.CONFIG_ENTITIES_FILENAME = 'fileName'
+        self.CONFIG_ENTITIES_BUDGET = 'BUDGET'
+        self.CONFIG_ENTITIES_ACTUAL = 'ACTUAL'
+        self.CONFIG_ENTITIES_PRIOR = 'PRIOR'
         self.budgetDf=pd.DataFrame()
         self.actualDf=pd.DataFrame()
         self.priorDf=pd.DataFrame()
@@ -27,9 +36,10 @@ class MicroExcel(object):
     def loadSheet(self,fileName):
         
         self.wb=openpyxl.load_workbook(fileName)
-        self.entities=self.wb["entities"]
+        self.entities=self.wb[self.CONFIG_SHEET_ENTITIES]
         config_cells=self.entities.__getitem__("A3:F100")
-        accountSheet=self.wb["accounts"]
+        accountSheet=self.wb[self.CONFIG_SHEET_ACCOUNTS]
+        self.templates=self.wb[self.CONFIG_SHEET_TEMPLATES]
         config_account_cells=accountSheet.__getitem__("A2:A160")
         self.accountList=nrd.leanupExcelAccountTupleCells(config_account_cells)
         for i in range(len(config_cells)):
@@ -99,7 +109,7 @@ class MicroExcel(object):
         presentSheets =self.wb[sheetName]
         pCells=presentSheets.__getitem__("A2:F150")
         df=pd.DataFrame(columns=ci.CONFIG_COLUMNS)
-        for i in range(1,len(pCells)):
+        for i in range(0,len(pCells)):
             if(pd.isnull(pCells[i][0].value)!=True):
                 row=[pCells[i][0].value,pCells[i][1].value,pCells[i][2].value,pCells[i][3].value,pCells[i][4].value,pCells[i][5].value]
                 df.loc[len(df)]=row
@@ -128,6 +138,15 @@ class MicroExcel(object):
         else:
             self.workbook=openpyxl.Workbook()
             
+    def printTemplates(self,outputData,template):
+        templateDFs=pd.DataFrame(self.templates.values)
+        for i in range(1,len(templateDFs)):
+            path=templateDFs.iloc[i][0]
+            fileName=path+templateDFs.iloc[i][1]
+            sheet=templateDFs.iloc[i][2]
+            
+            self.writeToSheet(fileName, sheet,outputData, template)
+                       
     def writeToSheet(self,outputFile,sheetName,outputData,template):
         self.getSheet(outputFile)
         sheet=self.workbook.create_sheet(title=sheetName)
