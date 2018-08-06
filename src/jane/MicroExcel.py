@@ -26,15 +26,15 @@ class MicroExcel(object):
         self.CONFIG_ENTITIES_BUDGET = 'BUDGET'
         self.CONFIG_ENTITIES_ACTUAL = 'ACTUAL'
         self.CONFIG_ENTITIES_PRIOR = 'PRIOR'
-        self.budgetDf=pd.DataFrame()
-        self.actualDf=pd.DataFrame()
-        self.priorDf=pd.DataFrame()
+        
 
         self.template=Template()
 
         
     def loadSheet(self,fileName):
-        
+        budgetDf=pd.DataFrame()
+        actualDf=pd.DataFrame()
+        priorDf=pd.DataFrame()
         self.wb=openpyxl.load_workbook(fileName)
         self.entities=self.wb[self.CONFIG_SHEET_ENTITIES]
         config_cells=self.entities.__getitem__("A3:F200")
@@ -59,48 +59,48 @@ class MicroExcel(object):
                     budgetSheets=wb2[budgetN]
     
                     cells=budgetSheets.__getitem__(sheetRange)
-                    budgetDf=nrd.normalizeExcel(ci.INDEX_F18,cells)
+                    budgetDf1=nrd.normalizeExcel(ci.INDEX_F18,cells)
                     #budgetDf=nrd.reduceRepositoryByAccounts(budgetDf, self.accountList)
-                    if(not self.budgetDf.empty):
-                        self.budgetDf=self.budgetDf+budgetDf
+                    if(not budgetDf1.empty):
+                        budgetDf=budgetDf+budgetDf1
                     else:
-                        self.budgetDf=budgetDf
+                        budgetDf=budgetDf1
     
                 if(actualN!=''):   
                     actualSheet=wb2[actualN]
                    
                     cells=actualSheet.__getitem__(sheetRange)
-                    actualDf=nrd.normalizeExcel(ci.INDEX_B18,cells)
+                    actualDf1=nrd.normalizeExcel(ci.INDEX_B18,cells)
                     #actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
-                    if(not self.actualDf.empty):
-                        self.actualDf=self.actualDf+actualDf
+                    if(not actualDf.empty):
+                        actualDf=actualDf+actualDf1
                     else:
-                        self.actualDf=actualDf
+                        actualDf=actualDf1
                 
                 if(priorN!=''):
                     priorSheet=wb2[priorN]
                     cells=priorSheet.__getitem__(sheetRange)
-                    priorDf=nrd.normalizeExcel(ci.INDEX_A17,cells)
+                    priorDf1=nrd.normalizeExcel(ci.INDEX_A17,cells)
                     #priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
-                    if(not self.priorDf.empty):
-                        self.priorDf=self.priorDf+priorDf
+                    if(not priorDf.empty):
+                        priorDf=priorDf+priorDf1
                     else:
-                        self.priorDf=priorDf
+                        priorDf=priorDf1
                
                 if(pd.isnull(b19N)!=True):
                     b19sheet=wb2[b19N]
                     cells=b19sheet.__getitem__(sheetRange)
                     b19Df=nrd.normalizeExcel(ci.INDEX_B19,cells)
                     
-        self.budgetDf=nrd.reduceRepositoryByAccounts(self.budgetDf, self.accountList)
-        self.actualDf=nrd.reduceRepositoryByAccounts(self.actualDf, self.accountList)
-        self.priorDf=nrd.reduceRepositoryByAccounts(self.priorDf, self.accountList)
+        budgetDf=nrd.reduceRepositoryByAccounts(budgetDf, self.accountList)
+        actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
+        priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
         #b19 is from different files. if it is empty, then set it to zero 
         if(pd.isnull(b19N)!=True):
-            self.b19=nrd.reduceRepositoryByAccounts(b19Df, self.accountList)
+            b19=nrd.reduceRepositoryByAccounts(b19Df, self.accountList)
         else:
-            self.b19=nrd.generateB19(self.budgetDf)
-        self.repos= self.generateRepos()                       
+            b19=nrd.generateB19(budgetDf)
+        self.repos= self.generateRepos(priorDf,actualDf,budgetDf,b19)                       
 
             
     
@@ -118,12 +118,12 @@ class MicroExcel(object):
     
 
     
-    def generateRepos(self):
+    def generateRepos(self,priorDf,actualDf,budgetDf,b19Df):
         repos=pd.DataFrame()
-        repos=repos.append(self.priorDf)
-        repos=repos.append(self.actualDf)
-        repos=repos.append(self.budgetDf)
-        repos=repos.append(self.b19)
+        repos=repos.append(priorDf)
+        repos=repos.append(actualDf)
+        repos=repos.append(budgetDf)
+        repos=repos.append(b19Df)
         # ensure repos don't have nan value in order to exception 
         repos=repos.replace(np.NaN,0)
         repos=repos.append(nrd.generatef18a17(repos))
