@@ -45,19 +45,19 @@ class MicroExcel(object):
         self.accountList=nrd.leanupExcelAccountTupleCells(config_account_cells)
         for i in range(len(config_cells)):
             
-            file=config_cells[i][0].value
-            if pd.isnull(file)==True:
+            entitiesFileName=config_cells[i][0].value
+            if pd.isnull(entitiesFileName)==True:
                 break
                 
-            if(pd.isnull(file)!=True):
-                priorN=config_cells[i][1].value
-                budgetN=config_cells[i][2].value
-                actualN=config_cells[i][3].value
-                b19N=config_cells[i][4].value
+            if(pd.isnull(entitiesFileName)!=True):
+                priorExist=config_cells[i][1].value
+                budgetExist=config_cells[i][2].value
+                actualExist=config_cells[i][3].value
+                b19Exist=config_cells[i][4].value
                 sheetRange=config_cells[i][5].value
-                wb2=openpyxl.load_workbook(file)
-                if(budgetN!=''):
-                    budgetSheets=wb2[budgetN]
+                wb2=openpyxl.load_workbook(entitiesFileName)
+                if(budgetExist!=''):
+                    budgetSheets=wb2[budgetExist]
     
                     cells=budgetSheets.__getitem__(sheetRange)
                     budgetDf1=nrd.normalizeExcel(ci.INDEX_F18,cells)
@@ -67,8 +67,8 @@ class MicroExcel(object):
                     else:
                         budgetDf=budgetDf1
     
-                if(actualN!=''):   
-                    actualSheet=wb2[actualN]
+                if(actualExist!=''):   
+                    actualSheet=wb2[actualExist]
                    
                     cells=actualSheet.__getitem__(sheetRange)
                     actualDf1=nrd.normalizeExcel(ci.INDEX_B18,cells)
@@ -78,8 +78,8 @@ class MicroExcel(object):
                     else:
                         actualDf=actualDf1
                 
-                if(priorN!=''):
-                    priorSheet=wb2[priorN]
+                if(priorExist!=''):
+                    priorSheet=wb2[priorExist]
                     cells=priorSheet.__getitem__(sheetRange)
                     priorDf1=nrd.normalizeExcel(ci.INDEX_A17,cells)
                     #priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
@@ -88,8 +88,8 @@ class MicroExcel(object):
                     else:
                         priorDf=priorDf1
                
-                if(pd.isnull(b19N)!=True):
-                    b19sheet=wb2[b19N]
+                if(pd.isnull(b19Exist)!=True):
+                    b19sheet=wb2[b19Exist]
                     cells=b19sheet.__getitem__(sheetRange)
                     b19Df=nrd.normalizeExcel(ci.INDEX_B19,cells)
                     
@@ -97,7 +97,7 @@ class MicroExcel(object):
         actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
         priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
         #b19 is from different files. if it is empty, then set it to zero 
-        if(pd.isnull(b19N)!=True):
+        if(pd.isnull(b19Exist)!=True):
             b19=nrd.reduceRepositoryByAccounts(b19Df, self.accountList)
         else:
             b19=nrd.generateB19(budgetDf)
