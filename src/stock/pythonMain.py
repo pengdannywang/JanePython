@@ -11,7 +11,7 @@ end = datetime.date.today()
  
 # Let's get Apple stock data; Apple's ticker symbol is AAPL
 # First argument is the series we want, second is the source ("yahoo" for Yahoo! Finance), third is the start date, fourth is the end date
-apple = web.DataReader("AAPL", start, end)
+f = web.DataReader('F', 'google', start, end)
  
-type(apple)
-print(apple)
+type(f)
+print(f)
