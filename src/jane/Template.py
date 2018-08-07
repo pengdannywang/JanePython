@@ -54,7 +54,7 @@ class Template(object):
 
         
         return result
-    def getAllAccounts(self,templateSheet,repos):
+    def getDataWithTemplateOrder(self,templateSheet,repos):
         
         parents1=self.getParents(templateSheet,2)
         parents2=self.getParents(templateSheet,3)

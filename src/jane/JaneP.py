@@ -20,7 +20,7 @@ class JaneP(object):
         self.sheetName='interface1'
         
         self.pres=Template()
-        # pres.getAllAccounts(templateWorkSheet, self.repos)
+        # pres.getDataWithTemplateOrder(templateWorkSheet, self.repos)
         #self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google=False
@@ -42,7 +42,7 @@ class JaneP(object):
         
     def createTemplate(self):
         self.templateWorkSheet=self.io.loadTemplateWorkSheet(self.sheetName)
-        self.outputData=self.pres.getAllAccounts(self.templateWorkSheet, self.repos)
+        self.outputData=self.pres.getDataWithTemplateOrder(self.templateWorkSheet, self.repos)
         
         #self.io.writeToSheet(self.outputFile, self.sheetName,self.outputData, self.templateWorkSheet)
         self.io.printTemplates(self.outputData,self.templateWorkSheet)
