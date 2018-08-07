@@ -39,6 +39,8 @@ class JaneP(object):
             self.io=MicroExcel()
             self.io.loadSheet(self.fileName)
         self.repos=self.io.repos
+        
+    def createTemplate(self):
         self.templateWorkSheet=self.io.loadTemplateWorkSheet(self.sheetName)
         self.outputData=self.pres.getAllAccounts(self.templateWorkSheet, self.repos)
         
@@ -53,7 +55,7 @@ class JaneP(object):
             #return
         try:
             # opts, args = getopt.getopt(argv,"hf:o:",["ifile=","ofile="])
-            opts, args = getopt.getopt(argv, "hgf:t:o:", ["help","google Drive","file=","templateWorkSheet=","output="])
+            opts, args = getopt.getopt(argv, "hgf:t:o:n", ["help","google Drive","file=","templateWorkSheet=","output=","noTemplate"])
         except getopt.GetoptError:
             print("Usage: " + sys.argv[0] + " -h for help")
             #sys.exit(2)
@@ -71,7 +73,12 @@ class JaneP(object):
             elif opt in ("-o","-output"):
                 self.io.outputName=arg
             
-        self.doProcess()
+            if opt in ("-n","-noTemplate"):
+                self.doProcess()
+            else:
+                self.doProcess()
+                self.createTemplate()
+                
 
 if __name__ == "__main__":
     jan=JaneP()
