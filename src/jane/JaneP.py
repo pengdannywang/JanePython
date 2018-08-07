@@ -68,7 +68,7 @@ class JaneP(object):
                 #self.google_cres=arg
             elif opt in ("-f","-file"):
                 self.io.fileName=arg
-            elif opt in ("-t","-templateWorkSheet"):
+            elif opt in ("-t","-template"):
                 self.io.sheetName=arg.lower()
             elif opt in ("-o","-output"):
                 self.io.outputName=arg
