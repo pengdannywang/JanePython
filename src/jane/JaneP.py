@@ -20,7 +20,7 @@ class JaneP(object):
         self.sheetName='interface1'
         
         self.pres=Template()
-        # pres.getAllAccounts(template, self.repos)
+        # pres.getAllAccounts(templateWorkSheet, self.repos)
         #self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google_cres="E:/downloads/JaneProject-f472d80e0028.json"
         self.google=False
@@ -29,6 +29,8 @@ class JaneP(object):
         self.googleFile='entityConfig'
         #self.outputFile='/Users/pengwang/Downloads/output.xlsx'
         self.outputFile='U:/tools/jane/output.xlsx'
+        
+        
     def doProcess(self):
         if(self.google):
             self.io=GoogleExcel()
@@ -37,11 +39,11 @@ class JaneP(object):
             self.io=MicroExcel()
             self.io.loadSheet(self.fileName)
         self.repos=self.io.repos
-        self.template=self.io.loadTemplate(self.sheetName)
-        self.outputData=self.pres.getAllAccounts(self.template, self.repos)
+        self.templateWorkSheet=self.io.loadTemplateWorkSheet(self.sheetName)
+        self.outputData=self.pres.getAllAccounts(self.templateWorkSheet, self.repos)
         
-        #self.io.writeToSheet(self.outputFile, self.sheetName,self.outputData, self.template)
-        self.io.printTemplates(self.outputData,self.template)
+        #self.io.writeToSheet(self.outputFile, self.sheetName,self.outputData, self.templateWorkSheet)
+        self.io.printTemplates(self.outputData,self.templateWorkSheet)
         
 
     def main(self,argv):
@@ -51,7 +53,7 @@ class JaneP(object):
             #return
         try:
             # opts, args = getopt.getopt(argv,"hf:o:",["ifile=","ofile="])
-            opts, args = getopt.getopt(argv, "hgf:t:o:", ["help","google Drive","file=","template=","output="])
+            opts, args = getopt.getopt(argv, "hgf:t:o:", ["help","google Drive","file=","templateWorkSheet=","output="])
         except getopt.GetoptError:
             print("Usage: " + sys.argv[0] + " -h for help")
             #sys.exit(2)
@@ -64,7 +66,7 @@ class JaneP(object):
                 #self.google_cres=arg
             elif opt in ("-f","-file"):
                 self.io.fileName=arg
-            elif opt in ("-t","-template"):
+            elif opt in ("-t","-templateWorkSheet"):
                 self.io.sheetName=arg.lower()
             elif opt in ("-o","-output"):
                 self.io.outputName=arg

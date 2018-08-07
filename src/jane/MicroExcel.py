@@ -27,9 +27,8 @@ class MicroExcel(object):
         self.CONFIG_ENTITIES_BUDGET = 'BUDGET'
         self.CONFIG_ENTITIES_ACTUAL = 'ACTUAL'
         self.CONFIG_ENTITIES_PRIOR = 'PRIOR'
-        
-
-        self.template=Template()
+      
+       
 
         
     def loadSheet(self,fileName):
@@ -106,7 +105,7 @@ class MicroExcel(object):
             
     
     
-    def loadTemplate(self,sheetName):
+    def loadTemplateWorkSheet(self,sheetName):
         presentSheets =self.wb[sheetName]
         pCells=presentSheets.__getitem__("A2:F150")
         df=pd.DataFrame(columns=ci.CONFIG_COLUMNS)
@@ -139,6 +138,7 @@ class MicroExcel(object):
         else:
             self.workbook=openpyxl.Workbook()#create new workbook
             
+            
     def printTemplates(self,outputData,template):
         templateDFs=pd.DataFrame(self.templates.values) # convert worksheets to dataFrame structure
         for i in range(1,len(templateDFs)): #loop all templates
@@ -147,8 +147,9 @@ class MicroExcel(object):
             sheet=templateDFs.iloc[i][2]
             
             self.writeToSheet(fileName, sheet,outputData, template)
+                      
                        
-    def writeToSheet(self,outputFile,sheetName,outputData,template):
+    def writeToSheet(self,outputFile,sheetName,outputData,templateWorkSheet):
         self.getSheet(outputFile)
         sheet=self.workbook.create_sheet(title=sheetName)
         
@@ -173,11 +174,12 @@ class MicroExcel(object):
         # a blank line 
         # print data
         row=4
-        for t in template.iterrows():
+        templateClass=Template()
+        for templateRow in templateWorkSheet.iterrows():
 
-            d=outputData.query(ci.INDEX_NAME+"=='"+t[1][ci.CONFIG_ACCOUNT]+"'")
+            d=outputData.query(ci.INDEX_NAME+"=='"+templateRow[1][ci.CONFIG_ACCOUNT]+"'")
             if(~d.empty and len(d)>0):
-                # template row is not percentages of other row
+                # templateWorkSheet row is not percentages of other row
                 sheet.cell(row,1,d.iloc[0][0])
                 for j in range(1,len(d.columns)):
                     col=j+1
@@ -187,8 +189,8 @@ class MicroExcel(object):
                         sheet.cell(row,col,"{:,.0f}".format(d.iloc[0][j]))
             else:
                 
-                if(t[1][ci.CONFIG_LEVEL]==10):
-                    percent=self.template.getPercentages(t[1][ci.CONFIG_ACCOUNT], t[1][ci.CONFIG_PRECENTAGES], t[1][ci.CONFIG_DENOMINATOR], outputData)
+                if(templateRow[1][ci.CONFIG_LEVEL]==10):
+                    percent=templateClass.getPercentages(templateRow[1][ci.CONFIG_ACCOUNT], templateRow[1][ci.CONFIG_PRECENTAGES], templateRow[1][ci.CONFIG_DENOMINATOR], outputData)
                     sheet.cell(row,1,percent.iloc[0][0])
                     for j in range(1,len(percent.columns)):
                         col=j+1
@@ -197,8 +199,8 @@ class MicroExcel(object):
                         sheet.cell(row,col,"{:1.0%}".format(percent.iloc[0][j]))
                         
                 else:
-                    sheet.cell(row,1,t[1][ci.CONFIG_ACCOUNT])
-#             if(t[1][ci.CONFIG_LEVEL!='1']):
+                    sheet.cell(row,1,templateRow[1][ci.CONFIG_ACCOUNT])
+#             if(templateRow[1][ci.CONFIG_LEVEL!='1']):
 #                 rowA=sheet.row_dimensions[row]
 #                 rowA.font=Font(b="border")
             row=row+1 

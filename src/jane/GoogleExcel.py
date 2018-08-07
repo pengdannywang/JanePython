@@ -96,7 +96,7 @@ class GoogleExcel(object):
             return self.generateRepos()
 
     
-    def loadTemplate(self,sheetName):
+    def loadTemplateWorkSheet(self,sheetName):
         presentListlists = self.co.worksheet(sheetName).get_all_values()
         df=pd.DataFrame(columns=ci.CONFIG_COLUMNS)
         for i in range(1,len(presentListlists)):
@@ -133,7 +133,7 @@ class GoogleExcel(object):
                 
         return self.co.add_worksheet(name,200,200)
     
-    def writeToSheet(self,fName,sheetName,outputData,template):
+    def writeToSheet(self,fName,sheetName,outputData,templateWorkSheet):
 
         sheet=self.getSheet(sheetName)
         sheet.clear()
@@ -146,13 +146,13 @@ class GoogleExcel(object):
         sheet.insert_row(outputData.columns.tolist(),2)
         
         row=4
-        for i in range(len(template)):
+        for i in range(len(templateWorkSheet)):
 
-            d=outputData.query(ci.INDEX_NAME+"=='"+template.iloc[i][1]+"'")
+            d=outputData.query(ci.INDEX_NAME+"=='"+templateWorkSheet.iloc[i][1]+"'")
             if(~d.empty and len(d)>0):
                 sheet.insert_row(d.iloc[0].tolist(),row)
             else:
-                sheet.insert_row(template.iloc[i][1],row)
+                sheet.insert_row(templateWorkSheet.iloc[i][1],row)
             row=row+1
  
     def printTemplates(self,outputData,template):

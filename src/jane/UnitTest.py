@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         print(self.io.repos.loc['a17'].div(self.io.repos.loc['b18']))
     @unittest.skip
     def testSheetName(self):
-        plds=self.io.loadTemplate('interface1')
+        plds=self.io.loadTemplateWorkSheet('interface1')
         df=pd.DataFrame(columns=['accounts','parent','level','percentages','formula'])
         for i in range(1,len(plds)):
             row=[plds[i][0],plds[i][1],plds[i][2],plds[i][3],plds[i][4]]
@@ -48,6 +48,7 @@ class Test(unittest.TestCase):
         test=self.io.repos.query("name in "+str(arr))
         print("------testCalculate------")
         print(test)
+        
     @unittest.skip
     def testShowHead(self):
         print(self.jan.pres.listHead(self.jan.repos))
