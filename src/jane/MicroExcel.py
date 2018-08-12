@@ -14,7 +14,9 @@ import pandas as pd
 import numpy as np
 import os
 from jane.Template import Template
-from _overlapped import NULL
+
+
+
 
 class MicroExcel(object):
 
@@ -31,11 +33,13 @@ class MicroExcel(object):
        
 
         
-    def loadSheet(self,fileName):
-        budgetDf=NULL
-        actualDf=NULL
-        priorDf=NULL
-        self.wb=openpyxl.load_workbook(fileName)
+    def loadSheet(self,path,fileName):
+        budgetDf=pd.DataFrame()
+        actualDf=pd.DataFrame()
+        priorDf=pd.DataFrame()
+        configFile=path+fileName
+        print("configFile=="+configFile)
+        self.wb=openpyxl.load_workbook(configFile)
         self.entities=self.wb[self.CONFIG_SHEET_ENTITIES]
         config_cells=self.entities.__getitem__("A3:F200")
         accountSheet=self.wb[self.CONFIG_SHEET_ACCOUNTS]
@@ -49,6 +53,7 @@ class MicroExcel(object):
                 break
                 
             if(pd.isnull(entitiesFileName)!=True):
+                entitiesFileName=path+entitiesFileName
                 priorExist=config_cells[i][1].value
                 budgetExist=config_cells[i][2].value
                 actualExist=config_cells[i][3].value
@@ -61,10 +66,9 @@ class MicroExcel(object):
                     cells=budgetSheets.__getitem__(sheetRange)
                     budgetDf1=nrd.normalizeExcel(ci.INDEX_F18,cells)
                     #budgetDf=nrd.reduceRepositoryByAccounts(budgetDf, self.accountList)
-                    if(~pd.isnull(budgetDf)):
-                        budgetDf=budgetDf+budgetDf1
-                    else:
-                        budgetDf=budgetDf1
+                    
+                    budgetDf=budgetDf.append(budgetDf1)
+               
     
                 if(actualExist!=''):   
                     actualSheet=wb2[actualExist]
@@ -72,20 +76,17 @@ class MicroExcel(object):
                     cells=actualSheet.__getitem__(sheetRange)
                     actualDf1=nrd.normalizeExcel(ci.INDEX_B18,cells)
                     #actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
-                    if(~pd.isnull(actualDf)):
-                        actualDf=actualDf+actualDf1
-                    else:
-                        actualDf=actualDf1
+                    
+                    actualDf=actualDf.append(actualDf1)
+              
                 
                 if(priorExist!=''):
                     priorSheet=wb2[priorExist]
                     cells=priorSheet.__getitem__(sheetRange)
                     priorDf1=nrd.normalizeExcel(ci.INDEX_A17,cells)
                     #priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
-                    if(~pd.isnull(priorDf)):
-                        priorDf=priorDf+priorDf1
-                    else:
-                        priorDf=priorDf1
+                    priorDf=priorDf.append(priorDf1)
+               
                
                 if(pd.isnull(b19Exist)!=True):
                     b19sheet=wb2[b19Exist]
@@ -100,6 +101,8 @@ class MicroExcel(object):
             b19=nrd.reduceRepositoryByAccounts(b19Df, self.accountList)
         else:
             b19=nrd.generateB19(budgetDf)
+        if(b19.emtpy):
+            print(b19)
         self.repos= self.generateRepos(priorDf,actualDf,budgetDf,b19)                       
 
             
@@ -129,6 +132,7 @@ class MicroExcel(object):
         repos=repos.append(nrd.generatef18a17(repos))
         repos=repos.append(nrd.generatef18b18(repos))
         repos=repos.append(nrd.generateb19f18(repos))
+        
         return repos
     
         
@@ -139,11 +143,14 @@ class MicroExcel(object):
             self.workbook=openpyxl.Workbook()#create new workbook
             
             
-    def printTemplates(self,outputData,template):
+    def printTemplates(self,abPath,outputData,template):
         templateDFs=pd.DataFrame(self.templates.values) # convert worksheets to dataFrame structure
         for i in range(1,len(templateDFs)): #loop all templates
             path=templateDFs.iloc[i][0]
-            fileName=path+templateDFs.iloc[i][1]
+            if(pd.isnull(path)):
+                fileName=abPath+templateDFs.iloc[i][1]
+            else:
+                fileName=path+templateDFs.iloc[i][1]
             sheet=templateDFs.iloc[i][2]
             
             self.writeToSheet(fileName, sheet,outputData, template)

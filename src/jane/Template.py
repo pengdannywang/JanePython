@@ -63,50 +63,29 @@ class Template(object):
         cols=[ci.INDEX_NAME]+ci.SORT_INDEXES*len(ci.COLUMNS_WITHOUT_INDEXES)
         pre_value=pd.DataFrame(columns=cols)
 
+
+        for i in range(0,len(templateSheet)):
+#             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i]
+            print(self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos))
+            if(templateSheet[ci.CONFIG_LEVEL].loc[i]==1): 
+                pre_value.loc[len(pre_value)]=self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos)
+
+                
         for p in parents1:
-            
-            for i in range(0,len(templateSheet)):
-                
-    #             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i]
-                if(templateSheet[ci.CONFIG_LEVEL].loc[i]==1): 
-                    if( templateSheet[ci.CONFIG_PARENT].loc[i]==p):
-                        pre_value.loc[len(pre_value)]=self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos)
-                
-                if( templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
-                    break
-                
+            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
+
         for p in parents2:
-            
-            for i in range(0,len(templateSheet)):
-    #             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i]
-                if(templateSheet[ci.CONFIG_LEVEL].loc[i]=='1'): 
-                    if( templateSheet[ci.CONFIG_PARENT].loc[i]==p):
-                        pre_value.loc[len(pre_value)]=self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos)
-    #             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i] 
-                if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
-                    break
-                
+            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
         for p in parents3:
-            for i in range(0,len(templateSheet)):
-    #             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i]
-                if(templateSheet[ci.CONFIG_LEVEL].loc[i]=='1'): 
-                    if( templateSheet[ci.CONFIG_PARENT].loc[i]==p):
-                        pre_value.loc[len(pre_value)]=self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos)
-                if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
-                    break    
-                    
+            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
+                
         for p in parents4:
-            for i in range(0,len(templateSheet)):
-    #             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i]
-                if(templateSheet[ci.CONFIG_LEVEL].loc[i]=='1'): 
-                    if( templateSheet[ci.CONFIG_PARENT].loc[i]==p):
-                        pre_value.loc[len(pre_value)]=self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos)
-                if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
-                    pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
-                    break
+            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+                pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
+
 #         percent=templateSheet.query(ci.CONFIG_LEVEL+"=='10'")
 #         percent=percent.reset_index()
 #         for i in range(0,len(percent)):
