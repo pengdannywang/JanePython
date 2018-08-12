@@ -139,7 +139,7 @@ def generateB19(data):
 
     
 def reduceRepositoryByAccounts(data,accountList):
-    
+    # have a bug for line 9
     data=data.loc[data.index.levels[1].isin(accountList[COLINDEX.ACCOUNT_NAME])]
     index_type=data.index.levels[0][0]
     temp=accountList[~accountList[COLINDEX.ACCOUNT_NAME].isin(data.index.levels[1].tolist())]
