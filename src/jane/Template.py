@@ -66,7 +66,7 @@ class Template(object):
 
         for i in range(0,len(templateSheet)):
 #             pre_value.loc[i][0]=templateSheet[ci.CONFIG_ACCOUNT].loc[i]
-            print(self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos))
+            #print(self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos))
             if(templateSheet[ci.CONFIG_LEVEL].loc[i]==1): 
                 pre_value.loc[len(pre_value)]=self.listRow(templateSheet[ci.CONFIG_ACCOUNT].loc[i],repos)
 

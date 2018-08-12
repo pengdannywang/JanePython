@@ -93,16 +93,17 @@ class MicroExcel(object):
                     cells=b19sheet.__getitem__(sheetRange)
                     b19Df=nrd.normalizeExcel(ci.INDEX_B19,cells)
                     
-        budgetDf=nrd.reduceRepositoryByAccounts(budgetDf, self.accountList)
-        actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
-        priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList)
+
         #b19 is from different files. if it is empty, then set it to zero 
         if(pd.isnull(b19Exist)!=True):
             b19=nrd.reduceRepositoryByAccounts(b19Df, self.accountList)
         else:
             b19=nrd.generateB19(budgetDf)
-        if(b19.emtpy):
-            print(b19)
+            
+        budgetDf=nrd.reduceRepositoryByAccounts(budgetDf, self.accountList)
+        actualDf=nrd.reduceRepositoryByAccounts(actualDf, self.accountList)
+        priorDf=nrd.reduceRepositoryByAccounts(priorDf, self.accountList) 
+        b19=nrd.reduceRepositoryByAccounts(b19, self.accountList)      
         self.repos= self.generateRepos(priorDf,actualDf,budgetDf,b19)                       
 
             

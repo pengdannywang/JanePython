@@ -130,7 +130,9 @@ def setIndexesByTypeAndName(typeName,rawData):
 
 def generateB19(data):
     b19=pd.DataFrame().reindex_like(data).fillna(0).replace([np.inf,-np.inf],0)
+    
     typeName=data.index.get_level_values(COLINDEX.INDEX_TYPE)[1]
+    print(typeName)
     b19.rename(index={typeName:COLINDEX.INDEX_B19},inplace=True)
 
     return b19
