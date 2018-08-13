@@ -1,28 +1,17 @@
+
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
-from scipy.stats import norm
-from sklearn.preprocessing import StandardScaler
-from scipy import stats
-import warnings
-warnings.filterwarnings('ignore')
+sns.set(style="darkgrid")
 
-
-main_file_path = 'U:/tools/kaggle/houseprice/train.csv' # this is the path to the Iowa data that you will use
-df_train = pd.read_csv(main_file_path)
-
-
-corrmat = df_train.corr()
-f, ax = plt.subplots(figsize=(12, 9))
-sns.heatmap(corrmat, vmax=.8, square=True);
-
-
-k = 10 #number of variables for heatmap
-cols = corrmat.nlargest(k, 'SalePrice')['SalePrice'].index
-cm = np.corrcoef(df_train[cols].values.T)
-sns.set(font_scale=1.25)
-hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size': 20}, yticklabels=cols.values, xticklabels=cols.values)
-plt.show()
-
-plt.show()
+fmri = sns.load_dataset("fmri")
+sns.relplot(x="timepoint", y="signal", kind="line", ci="sd", data=fmri);
+sns.relplot(x="timepoint", y="signal", hue="region", style="event",
+            dashes=False, markers=True, kind="line", data=fmri);
+            
+            
+sns.relplot(x="timepoint", y="signal", hue="event", style="event",
+            col="subject", col_wrap=5,
+            height=3, aspect=.75, linewidth=2.5,
+            kind="line", data=fmri.query("region == 'frontal'"));

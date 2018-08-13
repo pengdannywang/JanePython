@@ -72,26 +72,21 @@ class Template(object):
 
                 
         for p in parents1:
-            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+            if(~pd.isnull(p)):  
                 pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
 
         for p in parents2:
-            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+            if(~pd.isnull(p)):  
                 pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
         for p in parents3:
-            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+            if(~pd.isnull(p) ):  
                 pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
                 
         for p in parents4:
-            if(~pd.isnull(p) and templateSheet[ci.CONFIG_ACCOUNT].loc[i]==p):  
+            if(~pd.isnull(p)):  
                 pre_value.loc[len(pre_value)]=self.getSumOfAParent(p, templateSheet, pre_value)
 
-#         percent=templateSheet.query(ci.CONFIG_LEVEL+"=='10'")
-#         percent=percent.reset_index()
-#         for i in range(0,len(percent)):
-#  
-#             row=self.getPercentages(percent[ci.CONFIG_ACCOUNT].loc[i],percent[ci.CONFIG_PRECENTAGES].loc[i], percent[ci.CONFIG_DENOMINATOR].loc[i], pre_value)
-#             pre_value=pre_value.append(row,ignore_index=True)       
+
             
         return pre_value
 #         for a in accounts:

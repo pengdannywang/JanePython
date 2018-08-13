@@ -140,17 +140,28 @@ def generateB19(data):
     
 def reduceRepositoryByAccounts(data,accountList):
     # have a bug for line 9
-    data=data.loc[data.index.levels[1].isin(accountList[COLINDEX.ACCOUNT_NAME])]
-    index_type=data.index.levels[0][0]
-    temp=accountList[~accountList[COLINDEX.ACCOUNT_NAME].isin(data.index.levels[1].tolist())]
-    lv1=np.repeat(index_type,len(temp)).tolist()
-    lv2=temp[COLINDEX.ACCOUNT_NAME].tolist()
-    tupleIndex=list(zip(lv1,lv2))
-    multiIndex=pd.MultiIndex.from_tuples(tupleIndex, names=[COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME])
-    rows=pd.DataFrame(columns=data.columns,index=multiIndex).fillna(0)
-    data=data.append(rows)
-    return data         
-  
+   
+    
+
+    data.reset_index(inplace=True)
+    index_type=data[COLINDEX.INDEX_TYPE][0]
+    newDF=pd.DataFrame(columns=data.columns)
+    
+    for account in accountList.values:
+        row=data.query("name=='"+account[0]+"'")
+        newDF.reset_index(inplace=True,drop=True)
+        if(len(row)>0):
+            newDF=newDF.append(row)
+        else:
+            
+            lenDF=len(newDF)
+
+            newDF.loc[lenDF,COLINDEX.INDEX_TYPE]=index_type
+            newDF.loc[lenDF,COLINDEX.INDEX_NAME]=account[0]
+            newDF.loc[lenDF,2:]=0
+            
+    newDF=newDF.set_index([COLINDEX.INDEX_TYPE,COLINDEX.INDEX_NAME])
+    return newDF
             
 def validateList(row):
     validated=True

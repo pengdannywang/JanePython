@@ -38,7 +38,7 @@ class MicroExcel(object):
         actualDf=pd.DataFrame()
         priorDf=pd.DataFrame()
         configFile=path+fileName
-        print("configFile=="+configFile)
+        #print("configFile=="+configFile)
         self.wb=openpyxl.load_workbook(configFile)
         self.entities=self.wb[self.CONFIG_SHEET_ENTITIES]
         config_cells=self.entities.__getitem__("A3:F200")
