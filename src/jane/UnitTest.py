@@ -4,8 +4,8 @@ Created on 24Jul.,2018
 @author: pwang
 '''
 import unittest
-from jane.GoogleExcel import GoogleExcel
-from jane.JaneP import JaneP
+from GoogleExcel import GoogleExcel
+from JaneP import JaneP
 import pandas as pd
 import numpy as np
 

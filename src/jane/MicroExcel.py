@@ -8,12 +8,12 @@ from oauth2client.service_account import ServiceAccountCredentials
 import openpyxl
 from openpyxl.styles import Font, Fill
 from openpyxl.utils.dataframe import dataframe_to_rows 
-import jane.NormalizeRawData as nrd
-from jane.NormalizeRawData import COLINDEX as ci
+import NormalizeRawData as nrd
+from NormalizeRawData import COLINDEX as ci
 import pandas as pd
 import numpy as np
 import os
-from jane.Template import Template
+from Template import Template
 
 
 

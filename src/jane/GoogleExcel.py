@@ -6,8 +6,8 @@ Created on 24Jul.,2018
 '''
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
-import jane.NormalizeRawData as nrd
-from jane.NormalizeRawData import COLINDEX as ci
+import NormalizeRawData as nrd
+from NormalizeRawData import COLINDEX as ci
 import pandas as pd
 import numpy as np
 

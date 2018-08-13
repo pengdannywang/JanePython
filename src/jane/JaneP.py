@@ -7,16 +7,16 @@ Created on 23 Jul. 2018
 from datetime import datetime
 
 import sys, getopt
-from jane.MicroExcel import MicroExcel
-from jane.GoogleExcel import GoogleExcel
-from jane.Template import Template
+from MicroExcel import MicroExcel
+from GoogleExcel import GoogleExcel
+from Template import Template 
 import pandas as pd
 class JaneP(object):
-    
+
     def __init__(self):
         self.mth=datetime.now().month
-        
-        
+
+
         self.sheetName='interface1'
         self.path=''
         self.pres=Template()
@@ -29,11 +29,11 @@ class JaneP(object):
         self.googleFile='entityConfig'
         #self.outputFile='/Users/pengwang/Downloads/output.xlsx'
         self.outputFile='output.xlsx'
-        
-        
+
+
     def doProcess(self):
         self.fileName='entityConfig.xlsx'
-        
+
         if(self.google):
             self.io=GoogleExcel()
             self.io.loadSheet(self.google_cres)
@@ -41,7 +41,7 @@ class JaneP(object):
             self.io=MicroExcel()
             self.io.loadSheet(self.path,self.fileName)
         self.repos=self.io.repos
-        
+		
     def createTemplate(self):
         templateDFs=pd.DataFrame(self.io.templates.values) # convert worksheets to dataFrame structure
         for i in range(1,len(templateDFs)): #loop all templates
@@ -51,21 +51,21 @@ class JaneP(object):
             else:
                 fileName=path+templateDFs.iloc[i][1]
             sheet=templateDFs.iloc[i][2]
-            
+
             #self.writeToSheet(fileName, sheet,outputData, template)
             self.templateWorkSheet=self.io.loadTemplateWorkSheet(sheet)
             self.outputData=self.pres.getDataWithTemplateOrder(self.templateWorkSheet, self.repos)
-            
+
             self.io.writeToSheet(fileName, sheet,self.outputData, self.templateWorkSheet)
 
 
-        
+
             # self.io.writeToSheet(self.outputFile, self.sheetName,self.outputData, self.templateWorkSheet)
-        
-        
+
+
 
     def main(self,argv):
-        
+
         #if argv == []:
         #   print("Usage: " + sys.argv[0] + " -h for help")
             #return
@@ -81,6 +81,7 @@ class JaneP(object):
                 sys.exit()
             elif opt in ("-g", "-google"):
                 self.google=True
+                self.google=True
                 #self.google_cres=arg
             elif opt in ("-f","-file"):
                 self.path=arg
@@ -88,13 +89,13 @@ class JaneP(object):
                 self.sheetName=arg.lower()
             elif opt in ("-o","-output"):
                 self.outputName=arg
-            
+
             if opt in ("-n","-noTemplate"):
                 self.doProcess()
             else:
                 self.doProcess()
                 self.createTemplate()
-                
+
 
 if __name__ == "__main__":
     jan=JaneP()

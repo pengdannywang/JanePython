@@ -5,7 +5,7 @@ Created on 25 Jul. 2018
 '''
 import pandas as pd
 import numpy as np
-from jane.NormalizeRawData import COLINDEX as ci
+from NormalizeRawData import COLINDEX as ci
 
 class Template(object):
     
