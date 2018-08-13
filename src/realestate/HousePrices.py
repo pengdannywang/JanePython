@@ -1,17 +1,14 @@
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set(style="darkgrid")
+import matplotlib.pyplot as plt 
+import seaborn as sns 
 
-fmri = sns.load_dataset("fmri")
-sns.relplot(x="timepoint", y="signal", kind="line", ci="sd", data=fmri);
-sns.relplot(x="timepoint", y="signal", hue="region", style="event",
-            dashes=False, markers=True, kind="line", data=fmri);
-            
-            
-sns.relplot(x="timepoint", y="signal", hue="event", style="event",
-            col="subject", col_wrap=5,
-            height=3, aspect=.75, linewidth=2.5,
-            kind="line", data=fmri.query("region == 'frontal'"));
+from scipy.optimize import minimize
+def rosen(x):
+    "The Rosenbrock function"
+    return sum(100.0*(x[1:]-x[:-1]**2.0)**2.0 + (1-x[:-1])**2.0)
+
+x0 = np.array([1.3, 0.7, 0.8, 1.9, 1.2])
+res = minimize(rosen, x0, method='nelder-mead', options={'xtol': 1e-8, 'disp': True})
+print(res.x)
