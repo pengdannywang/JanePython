@@ -31,6 +31,9 @@ class CacheDataLogMigration():
         self.filename=self.filename+"_"+self.firstDay+"_"+self.lastDay+".csv"
          
     def migration(self):
+        if(self.mode=="production"):
+            self.u_name = "deploy"
+            self.serverID = 'central.livngds.com'
         pathfile=self.file_path+self.filename
          
         where="where logdate>='\\''"+self.firstDay+"'\\'' and logdate <='\\''"+self.lastDay+"'\\''"
@@ -161,6 +164,7 @@ class CacheDataLogMigration():
             if(os.path.isfile(self.targetPath+self.filename)):
                 print("\n=== "+self.filename+" exists in "+self.targetPath+", abort migration===\n")
             else:
+              
                 self.migration()
                 self.copyFileToTargetLocation()
                 self.uploadFileToTargetDb()
