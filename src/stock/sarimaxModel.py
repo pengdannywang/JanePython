@@ -69,20 +69,17 @@ def selectParameters(y,test_y):
     return para
 
 
-def sarimaxPrdict(train_y,test_y,start=None,end=None):
-    if(start==None):
-        start=str(test_y.index[0].date())
-    if(end==None):
-        end=str(test_y.index[-1].date())
+def sarimaxPrdict(train_y,para,steps=1):
+
     #para=[[0, 1, 2, 0, 0, 0, 12, 'c', 130.56524060691842,0.1542178000703068]]
 
-    para=selectParameters(train_y,test_y)
+
     print(para)
     t=para[0][7]
-    para=[int(x) for x in para[0][0:7]]
+    pdq=[int(x) for x in para[0][0:7]]
 
-    param=list(para[0:3])
-    ps=list(para[3:7])
+    param=list(pdq[0:3])
+    ps=list(pdq[3:7])
 
 
     model = sm.tsa.statespace.SARIMAX(train_y,
@@ -93,8 +90,8 @@ def sarimaxPrdict(train_y,test_y,start=None,end=None):
                                          enforce_invertibility=False)
 
     model_fit = model.fit(disp=False)
-    print(start+' '+end)
-    pred=model_fit.get_prediction(start=start,end=end, dynamic=False)
+
+    pred=model_fit.forecast(steps=steps)
 
     return pred
 #B         business day frequency
@@ -124,25 +121,31 @@ def sarimaxPrdict(train_y,test_y,start=None,end=None):
 #L, ms     milliseconds
 #U         microseconds
 #N, us     nanoseconds
-res=data.resample('W').mean()
+name='HES'
+y=data[name].resample('MS').mean()
 
-y=res['GOOGL']
-train_y,test_y=y[:-6],y[-6:]
-pred=sarimaxPrdict(train_y,test_y,start='2019-03',end='2019-05')
 
-pred_ci = pred.conf_int()
+train_y,test_y=y[:-3],y[-3:]
+para=selectParameters(train_y,test_y)
+#para=[[1, 1, 1, 0, 1, 1, 12, 'ct', 417.3887417838322, 1.99461916184895]]
+
+pred=sarimaxPrdict(y,para,steps=15)
+pred_ci=pd.DataFrame(index=pred.index)
+pred_ci['low'] = pred-pred*0.05
+pred_ci['upper'] = pred+pred*0.05
+
 
 #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
 #pred_ci=pred_ci.sort_index()
 ax = y['2018':].plot(label='observed')
-pred.predicted_mean.plot(ax=ax, label='Forecast', alpha=.7)
+pred.plot(ax=ax, label='Forecast', alpha=.7)
 
-ax.fill_between(pred_ci.index,
-                pred_ci.iloc[:, 0],
-                pred_ci.iloc[:, 1], color='k', alpha=.1)
+ax.fill_between(pred.index,
+                pred_ci.iloc[:,0],
+                pred_ci.iloc[:,1], color='k', alpha=.1)
 
 ax.set_xlabel('Date')
-ax.set_ylabel('CO2 Levels')
+ax.set_ylabel(name)
 plt.legend()
 
 plt.show()
