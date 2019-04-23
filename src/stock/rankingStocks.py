@@ -18,7 +18,7 @@ from statsmodels.tsa.stattools import adfuller
 import matplotlib.pylab as plt
 import itertools
 data=pd.read_csv('u:/python/test/computedStocks.csv',index_col=0)
-stock=pd.read_csv('u:/python/test/stocks.csv',parse_dates=['Date'],index_col='Date')
+stock=pd.read_csv('u:/python/test/stocks.csv',parse_dates=['Date'],index_col='Date')  
 stock=stock.resample('MS').mean()
 stock=stock.dropna(axis=1)
 aa=stock.iloc[-1]

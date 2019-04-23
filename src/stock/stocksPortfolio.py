@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-import quandl
+import pandas_datareader.data as web
 import datetime
 import random
 
@@ -54,8 +54,11 @@ start = datetime.datetime(2018,1,1)
 end = datetime.date.today()
 #forcast each stock ranking them to find top 5
 for item in scraped_tickers:
-    data[item] = quandl.get('WIKI/'+item, start_date=start,end_date=end)['Adj. Close']
-
+    try:
+        data[item] = web.DataReader(item, "yahoo", start,end)['Adj Close']
+    except:
+        print(item+"error")
+        pass
 daily_simple_returns = data.pct_change()
 annual_returns = daily_simple_returns.mean() * 250
 print(annual_returns)

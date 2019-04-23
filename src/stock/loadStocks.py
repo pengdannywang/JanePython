@@ -58,7 +58,7 @@ scraped_tickers = ['MMM', 'ABT', 'ABBV', 'ACN', 'ATVI', 'AYI', 'ADBE', 'AMD', 'A
 len(scraped_tickers)
 data =pd.DataFrame()
 def evaluatePrice(item,resample='MS',p_start='2019-01-01'):
-    start = datetime.datetime(2017,1,1)
+    start = datetime.datetime(2016,1,1)
     end = datetime.date.today()
     res=web.DataReader(item,"yahoo",start,end)['Adj Close']
 
@@ -66,11 +66,14 @@ def evaluatePrice(item,resample='MS',p_start='2019-01-01'):
     return res
 
 #random_selection = random.sample(scraped_tickers, len(scraped_tickers))
+
+errors=pd.DataFrame()
 for item in scraped_tickers:
     try:
         data[item] =evaluatePrice(item)
         print(data[item].name)
     except:
         print(item+" error")
+        errors=errors.append([item])
         pass
-data.to_csv('u:/python/test/stocks.csv')
+data.to_csv('/Users/pengwang/work/stocks.csv')
