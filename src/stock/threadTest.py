@@ -1,5 +1,6 @@
 import pandas as pd
 import warnings
+from datetime import datetime
 from optParameterThreads import optimizeParameter
 from sarimaxModel import sarimaxPrdict
 warnings.filterwarnings('ignore')
@@ -20,8 +21,11 @@ class myThread (threading.Thread):
         self.item = item
         self.pred=None
     def run(self):
-        print("thread:-{}-{}",self.threadID,self.item )
+        start=datetime.now()
+        print("thread:",self.threadID,self.item ,",start=",start)
         self.pred=evaluateStock(self.item)
+        end=datetime.now()-start
+        print("thread period=",self.threadID,self.item ,end.seconds)
         
     def get_value(self):
         return self.pred
@@ -33,10 +37,10 @@ def evaluateStock(item,steps=3):
 
  
     p1,p2,t,err=optimizeParameter(y,steps=6,disp=False)
-    pred=sarimaxPrdict(y,p1,p2,t,steps=3,disp=True)
+    pred=sarimaxPrdict(y,p1,p2,t,steps=3,disp=False)
     return pred
-    
-scraped_tickers = ['MMM', 'ABT', 'ABBV', 'ACN', 'ATVI', 'AYI', 'ADBE', 'AMD', 'AAP']
+start=datetime.now()
+scraped_tickers = ['MMM', 'ABT', 'ABBV', 'ITW', 'ILMN']
 id=1
 result=pd.DataFrame()
 for item in scraped_tickers:
@@ -48,4 +52,7 @@ for item in scraped_tickers:
 for t in threads:
     t.join()
     result[t.get_item()]=t.get_value()
+end=datetime.now()
+period=end-start
+print("total period==",period.seconds)
 print(result)

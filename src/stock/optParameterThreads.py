@@ -15,12 +15,13 @@ from statsmodels.tsa.stattools import adfuller
 
 import queue
 import threading
+
 import time
 import matplotlib.pylab as plt
 import itertools
 import math
 import warnings
-start=datetime.now()
+from datetime import datetime
 warnings.filterwarnings('ignore')
 
 def measure_rmse(actual, predicted):
@@ -187,8 +188,13 @@ def optimizeParameter(y, steps=6,disp=False):
     return p1,p2,t,err
 
 
-#data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
-#data=data.resample('MS').mean()
-#y=data['ABBV']
-#para=optimizeParameter(y,steps=6,disp=False)
-print (datetime.now()-start)
+data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
+
+data=data.resample('MS').mean()
+y=data['ABBV']
+start=datetime.now()
+para=optimizeParameter(y,steps=3,disp=False)
+end=datetime.now()
+period=end-start
+
+print('period:',period.seconds)

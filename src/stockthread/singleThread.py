@@ -1,41 +1,34 @@
-from datetime import datetime
-import time
 import pandas as pd
 import warnings
-
+from datetime import datetime
 from sarimaxModel import selectParameters
 from sarimaxModel import sarimaxPrdict
-import multiprocessing
-import psutil
 warnings.filterwarnings('ignore')
 data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
-data=data.resample('MS').mean()
 
+y=data.resample('MS').mean()
+ 
+        
+def evaluateStock(item,steps=3):
 
-def evaluateStock(item,steps=6):
-    
-    y=data[item]
-
-
-    p1,p2,t,err=selectParameters(y,steps=3,disp=False)
-
+ 
+    p1,p2,t,err=selectParameters(y,steps=6,disp=False)
     pred=sarimaxPrdict(y,p1,p2,t,steps=3,disp=False)
-
     return pred
 start=datetime.now()
-pool=multiprocessing.Pool(processes=15)
-result=pd.DataFrame()
-    
 scraped_tickers = ['GWW', 'ABT','SRE','PCAR', 'ITW', 'ILMN']
-
+id=1
+result=pd.DataFrame()
 for item in scraped_tickers:
+    thread=myThread(id,item)
+    thread.start()
+    threads.append(thread)
+    id+=1
     
-    result[item]=pool.apply(evaluateStock,(item,))
-procs = list() 
-
-pool.close()
-pool.join
+for t in threads:
+    t.join()
+    result[t.get_item()]=t.get_value()
 end=datetime.now()
 period=end-start
 print("total period==",period.seconds)
-print(result.head())
+print(result)

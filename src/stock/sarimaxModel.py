@@ -128,6 +128,15 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
         plt.show()
     return pred
 
+data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
 
-print (datetime.now()-start)
+data=data.resample('MS').mean()
+y=data['ABBV']
+start=datetime.now()
+para=selectParameters(y,steps=3,disp=False)
+end=datetime.now()
+period=end-start
+
+print('period:',period.seconds)
+
         
