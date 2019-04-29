@@ -34,8 +34,7 @@ class Cachedata(object):
         else:
             print(self.symbal+self.empty_snapshot_name+" isn't exists")
             return False
-    def check_product_snapshot(self):
-        file=
+
     def load_empty_voltdb_schema(self):
 
             if(self.check_empty_voltdb()):

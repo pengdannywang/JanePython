@@ -27,6 +27,9 @@ class CacheDataLogMigration():
             year=datetime.now().year
         if (month is None):
             month=datetime.now().month-1
+        if(month==0):
+            year=year-1
+            month=month+12
         self.firstDay,self.lastDay=self.timeRange(year,month,monthRange)
         self.filename=self.filename+"_"+self.firstDay+"_"+self.lastDay+".csv"
          

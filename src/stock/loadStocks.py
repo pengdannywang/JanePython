@@ -103,8 +103,17 @@ if exists:
                 print(item+" error")
                 errors=errors.append([item])
                 pass
-    else:
-        start=datetime.datetime(end.year-2,end.month,end.day).date()
-        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']
-        data[item]=remains
+else:
+    start=datetime.datetime(end.year-2,end.month,end.day).date()
+    
+    for item in scraped_tickers:
+        try:
+            res=None
+            res=web.DataReader(item,"yahoo",start,end)['Adj Close']
+            data[item] =res
+        except:
+            print(item+" error")
+            errors=errors.append([item])
+            pass
+
 data.to_csv(path)
