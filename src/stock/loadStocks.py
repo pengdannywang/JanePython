@@ -2,7 +2,7 @@ import pandas as pd
 import pandas_datareader.data as web   # Package and modules for importing data; this code may change depending on pandas version
 import datetime
 import numpy as np
-
+import os
 import random
 import statsmodels.api as sm
 # SARIMAX example
@@ -57,23 +57,54 @@ scraped_tickers = ['MMM', 'ABT', 'ABBV', 'ACN', 'ATVI', 'AYI', 'ADBE', 'AMD', 'A
                    'WYNN', 'XEL', 'XRX', 'XLNX', 'XL', 'XYL', 'YUM', 'ZBH', 'ZION', 'ZTS']
 len(scraped_tickers)
 data =pd.DataFrame()
-def evaluatePrice(item,resample='MS',p_start='2019-01-01'):
-    start = datetime.datetime(2016,1,1)
-    end = datetime.date.today()
-    res=web.DataReader(item,"yahoo",start,end)['Adj Close']
+def evaluatePrice(item,path,resample='MS',p_start='2019-01-01'):
 
+    if exists:
+        file=pd.read_csv(path,parse_dates=['Date'],index_col='Date')
+        if len(file)>0:
+            start=file.index[-1]
+            start=start.date()
+    else:
+        start=datetime.datetime(end.year-2,end.month,end.day)
+    print('date::',start,end,start<end)
+    if(start<end):
+
+        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']
+        res=file.append(remains)
+        
+    else:
+        res=file
 
     return res
 
 #random_selection = random.sample(scraped_tickers, len(scraped_tickers))
-
+path='U:/python/test/stocks.csv'
 errors=pd.DataFrame()
-for item in scraped_tickers:
-    try:
-        data[item] =evaluatePrice(item)
-        print(data[item].name)
-    except:
-        print(item+" error")
-        errors=errors.append([item])
-        pass
-data.to_csv('/Users/pengwang/work/stocks.csv')
+file=pd.DataFrame()
+exists = os.path.isfile(path)
+if exists:
+    file=pd.read_csv(path,parse_dates=['Date'],index_col='Date')
+    if len(file)>0:
+        start=file.index[-1]
+        start=start.date()
+        for item in scraped_tickers:
+            try:
+                res=None
+                print('date::',start,end,start<end)
+                if(start<end):
+                    remains=web.DataReader(item,"yahoo",start,end)['Adj Close']
+                    res=file.append(remains)
+                    
+                else:
+                    res=file
+                
+                data[item] =res
+            except:
+                print(item+" error")
+                errors=errors.append([item])
+                pass
+    else:
+        start=datetime.datetime(end.year-2,end.month,end.day).date()
+        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']
+        data[item]=remains
+data.to_csv(path)
