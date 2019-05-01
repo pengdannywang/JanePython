@@ -1,7 +1,7 @@
 import pandas as pd
 
 from datetime import datetime
-
+import pandas_datareader.data as web
 import statsmodels.api as sm
 
 # SARIMAX example
@@ -14,7 +14,7 @@ import matplotlib.pylab as plt
 import itertools
 import math
 import warnings
-start=datetime.now()
+
 warnings.filterwarnings('ignore')
 
 def measure_rmse(actual, predicted):
@@ -128,15 +128,18 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
         plt.show()
     return pred
 
-data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
+#data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
 
-data=data.resample('MS').mean()
-y=data['ABBV']
-start=datetime.now()
-para=selectParameters(y,steps=3,disp=False)
-end=datetime.now()
-period=end-start
-
-print('period:',period.seconds)
+#data=data.resample('MS').mean()
+#start=datetime('2017-01-01')
+#end=datetime.now()
+#y=web.DataReader('^RUT',"yahoo",start,end)['Adj Close'].resample('M').pad()
+#
+#
+#para=selectParameters(y,steps=2,disp=True)
+#end=datetime.now()
+#period=end-start
+#
+#print('period:',period.seconds)
 
         

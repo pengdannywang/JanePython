@@ -4,13 +4,35 @@ import datetime
 import numpy as np
 import os
 import random
+from datetime import timedelta
 import statsmodels.api as sm
 # SARIMAX example
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
+import sys, getopt
 # We will look at stock prices over the past year, starting at January 1, 2016
-start = datetime.datetime(2017,1,1)
-end = datetime.date.today()
+
+def main(argv):
+   inputfile = ''
+   outputfile = ''
+   try:
+      opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
+   except getopt.GetoptError:
+      print ('test.py -i <inputfile> -o <outputfile>')
+      sys.exit(2)
+   for opt, arg in opts:
+      if opt == '-h':
+         print ('test.py -i <inputfile> -o <outputfile>')
+         sys.exit()
+      elif opt in ("-i", "--ifile"):
+         inputfile = arg
+      elif opt in ("-o", "--ofile"):
+         outputfile = arg
+   print ('Input file is "', inputfile)
+   print ('Output file is "', outputfile)
+if __name__ == "__main__":
+   main(sys.argv[1:])
+
+
  
 
 
@@ -57,6 +79,8 @@ scraped_tickers = ['MMM', 'ABT', 'ABBV', 'ACN', 'ATVI', 'AYI', 'ADBE', 'AMD', 'A
                    'WYNN', 'XEL', 'XRX', 'XLNX', 'XL', 'XYL', 'YUM', 'ZBH', 'ZION', 'ZTS']
 len(scraped_tickers)
 data =pd.DataFrame()
+end = datetime.date.today()
+
 def evaluatePrice(item,path,resample='MS',p_start='2019-01-01'):
 
     if exists:
@@ -82,6 +106,8 @@ path='U:/python/test/stocks.csv'
 errors=pd.DataFrame()
 file=pd.DataFrame()
 exists = os.path.isfile(path)
+
+start=datetime.datetime(end.year-2,end.month,end.day).date()
 if exists:
     file=pd.read_csv(path,parse_dates=['Date'],index_col='Date')
     if len(file)>0:
@@ -89,8 +115,9 @@ if exists:
         start=start.date()
         for item in scraped_tickers:
             try:
+                print(item,'date::',start,end,start<end)
                 res=None
-                print('date::',start,end,start<end)
+                
                 if(start<end):
                     remains=web.DataReader(item,"yahoo",start,end)['Adj Close']
                     res=file.append(remains)
@@ -98,22 +125,23 @@ if exists:
                 else:
                     res=file
                 
-                data[item] =res
-            except:
-                print(item+" error")
-                errors=errors.append([item])
+                data[item] =res[item]
+            except Exception as e: 
+                print(item,'error',e)
+                
                 pass
 else:
     start=datetime.datetime(end.year-2,end.month,end.day).date()
     
     for item in scraped_tickers:
         try:
+            print(item,'date::',start,end,start<end)
             res=None
             res=web.DataReader(item,"yahoo",start,end)['Adj Close']
             data[item] =res
-        except:
-            print(item+" error")
-            errors=errors.append([item])
+        except Exception as e: 
+            print(item,'error',e)
+            
             pass
 
 data.to_csv(path)
