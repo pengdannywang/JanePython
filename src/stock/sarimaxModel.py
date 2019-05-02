@@ -95,7 +95,7 @@ def selectParameters(y,steps=3,disp=False):
 
 
 def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
-
+    
     model = sm.tsa.statespace.SARIMAX(train_y,
                                          order=p_order,
                                          seasonal_order=p_seasonal_order,
@@ -107,6 +107,7 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
 
     pred=model_fit.forecast(steps=steps)
     if disp:
+        
         pred_ci=pd.DataFrame(index=pred.index)
         pred_ci['low'] = pred-pred*0.05
         pred_ci['upper'] = pred+pred*0.05
@@ -115,6 +116,7 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
         ax = train_y['2018':].plot(label='observed')
+        
         pred.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(pred.index,
@@ -124,7 +126,6 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
         ax.set_xlabel('Date')
         ax.set_ylabel(train_y.name)
         plt.legend()
-        
         plt.show()
     return pred
 

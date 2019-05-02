@@ -16,7 +16,7 @@ def evaluateStock(item,steps=3):
     pred=sarimaxPrdict(y,p1,p2,t,steps=3,disp=False)
     return pred
 start=datetime.now()
-scraped_tickers = ['GWW', 'ABT','SRE','PCAR', 'ITW', 'ILMN']
+scraped_tickers = ['CHK', 'UA','UAA','NTAP', 'DLPH']
 id=1
 result=pd.DataFrame()
 for item in scraped_tickers:
