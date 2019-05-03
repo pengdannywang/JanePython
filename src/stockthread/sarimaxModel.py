@@ -1,9 +1,8 @@
 import pandas as pd
 
-from datetime import datetime
-import pandas_datareader.data as web
-import statsmodels.api as sm
 
+import statsmodels.api as sm
+import os
 # SARIMAX example
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
@@ -20,7 +19,7 @@ warnings.filterwarnings('ignore')
 def measure_rmse(actual, predicted):
 	return math.sqrt(mean_squared_error(actual, predicted))
 
-def selectParameters(y,steps=3,disp=False):
+def selectParameters(ticker,y,steps=3,disp=False):
     train_y, test_y = y[:-steps], y[-steps:]
     # Define the p, d and q parameters to take any value between 0 and 2
     p = d = q = range(0, 2)
@@ -57,7 +56,7 @@ def selectParameters(y,steps=3,disp=False):
                     mses=mses.append([list(param)+list(param_seasonal)+[t]+[model_fit.aic]+[mse]],ignore_index=True)
 
                     if parameters==[] or parameters[-1]>mse:
-                        parameters=list(param)+list(param_seasonal)+[t]+[model_fit.aic]+[mse]
+                        parameters=[ticker]+list(param)+list(param_seasonal)+[t]+[model_fit.aic]+[mse]
                         forcast=pred
                     
                 except :
@@ -66,6 +65,7 @@ def selectParameters(y,steps=3,disp=False):
                     error=error.append([list(param)+list(param_seasonal)+[t]],ignore_index=True)
 
                     pass
+    print(parameters)
     #model_fit=model.fit(disp=0)
     if disp:  
 
@@ -77,7 +77,7 @@ def selectParameters(y,steps=3,disp=False):
         
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
-        ax = y['2018':].plot(label='observed')
+        ax = y.plot(label='observed')
         forcast.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(forcast.index,
@@ -85,16 +85,16 @@ def selectParameters(y,steps=3,disp=False):
                         pred_ci.iloc[:,1], color='k', alpha=.1)
         
         ax.set_xlabel('Date')
-        ax.set_ylabel(y.name)
+        ax.set_ylabel(ticker)
         plt.legend()
         
         plt.show()
-    p1,p2,t,err=parameters[0:3],parameters[3:7],parameters[7],parameters[-1]
-
-    return p1,p2,t,err
 
 
-def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
+    return parameters
+
+
+def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
 
     model = sm.tsa.statespace.SARIMAX(train_y,
                                          order=p_order,
@@ -122,11 +122,33 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
                         pred_ci.iloc[:,1], color='k', alpha=.1)
         
         ax.set_xlabel('Date')
-        ax.set_ylabel(train_y.name)
+        ax.set_ylabel(ticker)
         plt.legend()
         
         plt.show()
     return pred
+
+def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame()
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+
+    
+    p1,p2,t=[],[],''
+
+    if (len(params.index)>0 and pd.Series(params.iloc[:,0]==ticker).any()):
+        p=params[params.iloc[:,0]==ticker]
+        p1,p2,t=p[1:4],p[4:8],p[8]
+    else:
+        parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        
+        params=params.append([parameters])
+        
+        p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+
+        params.to_csv(paramPath)
+    return sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
 
 #data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
 
