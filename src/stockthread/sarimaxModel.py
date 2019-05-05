@@ -139,8 +139,19 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
 
     if (len(params.index)>0 and pd.Series(params.iloc[:,0]==ticker).any()):
         p=params[params.iloc[:,0]==ticker]
-        print('params:',p)
-        p1,p2,t=p[1:4],p[4:8],p[8]
+        if len(p.index)>0:
+
+            li=p.values.tolist()[0]
+            p1,p2,t=li[1:4],li[4:8],li[8]
+        else:
+            parameters=selectParameters(ticker,y,steps=steps,disp=False)
+ 
+            p=pd.DataFrame([parameters],columns=params.columns)
+            paracollector=params.append(p,ignore_index=True)
+            print('params exist:',parameters)
+            p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+    
+            paracollector.to_csv(paramPath)  
     else:
         parameters=selectParameters(ticker,y,steps=steps,disp=False)
  
