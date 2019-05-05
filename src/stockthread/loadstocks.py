@@ -22,30 +22,31 @@ def getStartDate(end,months):
     start=datetime.datetime(year,month,day)
     return start
 
-def loadStocksByTickers(scraped_tickers,path,months=18):
+def loadStocksByTickers(scraped_tickers,savepath,months=18):
     end = datetime.date.today()
+    #end =datetime.datetime(end.year,end.month,1).date()
     file=pd.DataFrame()
-    exists = os.path.isfile(path)
-    data =pd.DataFrame()
+    exists = os.path.isfile(savepath)
+    ds =pd.DataFrame()
     start=getStartDate(end,months).date()
     if exists:
-        file=pd.read_csv(path,parse_dates=['Date'],index_col='Date')
+        file=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
         if len(file)>0:
             start=file.index[-1]
             start=start.date()
             for item in scraped_tickers:
                 try:
-                    print(item,'date::',start,end,start<end)
+                    print(item,'file exist date::',start,end,start<end)
                     res=None
                     
                     if(start<end):
-                        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']
-                        res=file.append(remains)
-                        
+                        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
+                        res=file[item].combine_first(remains)
+            
                     else:
-                        res=file
+                        res=file[item]
                     
-                    data[item] =res[item]
+                    ds[item] =res
                 except Exception as e: 
                     print(item,'error',e)
                     pass
@@ -56,15 +57,17 @@ def loadStocksByTickers(scraped_tickers,path,months=18):
                 print(item,'date::',start,end,start<end)
                 res=None
                 res=web.DataReader(item,"yahoo",start,end)['Adj Close']
-                data[item] =res
+                ds[item] =res
             except Exception as e: 
                 print(item,'error',e)
                 pass
-    data=data.dropna(axis=1)
-    data.to_csv(path)
-    return data
+    ds.dropna(axis=1,inplace=True)
 
-def loadAuTickersFromYahooExcel(inputFile,outputFile):
+    #savepath='/Users/pengwang/Dropbox/finance/ttest.csv'
+    ds.to_csv(savepath)
+    return ds
+
+def loadAuTickersFromYahooExcel(inputFile):
 
     stock_names=pd.read_excel(inputFile,header=3,usecols=4)
     
@@ -96,8 +99,6 @@ def main(argv):
     return inputfile,outputfile
 
 
-if __name__ == "__main__":
-   inputfile,outputfile=main(sys.argv[1:])
-   scraped_tickers=loadAuTickersFromYahooExcel(inputfile,outputfile)
-   loadStocksByTickers(scraped_tickers,outputfile,period=2)
+
+
    

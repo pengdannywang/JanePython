@@ -6,17 +6,17 @@ from loadstocks import loadStocksByTickers
 from loadstocks import loadAuTickersFromYahooExcel
 # We will look at stock prices over the past year, starting at January 1, 2016
 
-path='U:/python/JanePython/'
+path='/Users/pengwang/Dropbox/finance/'
 inputfile = path+'Yahoo.xlsx'
 outputfile = path+'stocks.csv'
-
-tickers=loadAuTickersFromYahooExcel(inputfile,outputfile)
+tickers=['BMP.AX','REA.AX','CPU.AX']
+tickers=loadAuTickersFromYahooExcel(inputfile)
 stocks=loadStocksByTickers(tickers,outputfile)
 data=stocks.resample('MS').mean()
 result=pd.DataFrame()
 param=pd.DataFrame()
 for ticker in data.columns:
-    pred=forcastStocks(path+'paramters.csv',ticker,data[ticker])
+    pred=forcastStocks(path+'parameters.csv',ticker,data[ticker])
     result[ticker]=pred
     
 
