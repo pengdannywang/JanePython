@@ -22,42 +22,52 @@ def getStartDate(end,months):
     start=datetime.datetime(year,month,day)
     return start
 
-def loadStocksByTickers(scraped_tickers,savepath,months=18):
+def loadStocksByTickers(scraped_tickers,path,filename,months=18):
     end = datetime.date.today()
+    savepath=path+filename
+    errorpath=path+'error.csv'
     #end =datetime.datetime(end.year,end.month,1).date()
     file=pd.DataFrame()
     exists = os.path.isfile(savepath)
     ds =pd.DataFrame()
-    
+
+    errors=pd.DataFrame([],columns=['error'])
+    errorexists=os.path.isfile(errorpath)
+    if(errorexists):
+        errors=pd.read_csv(errorpath,index_col=0)
     if exists:
         file=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
 
     for item in scraped_tickers:
         try:
-            if(exists and file.columns.contains(item)):
-                start=file['REA.AX'].index[-1].date()
-                print(item,' exist date::',start,end,start<end)
-                res=None
-    
-                if(start<end):
-                    remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
-                    res=file[item].combine_first(remains)
+            if not errors['error']==item:
+                if(exists and file.columns.contains(item)):
+                    start=file['REA.AX'].index[-1].date()
+                    print(item,' exist date::',start,end,start<end)
+                    res=None
+        
+                    if(start<end):
+                        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
+                        res=file[item].combine_first(remains)
+                    else:
+                        res=file[item]
+        
+                    ds[item] =res
                 else:
-                    res=file[item]
-    
-                ds[item] =res
-            else:
-                start=getStartDate(end,months).date()
-                print(item,'new date::',start,end,start<end)
-                ds[item]=web.DataReader(item,"yahoo",start,end)['Adj Close']
+                    start=getStartDate(end,months).date()
+                    print(item,'new date::',start,end,start<end)
+                    ds[item]=web.DataReader(item,"yahoo",start,end)['Adj Close']
 
         except Exception as e: 
             print(item,'error',e)
+            da=pd.DataFrame([item],columns=errors.columns)
+            errors=errors.append(da,ignore_index=True)
             pass
     
     ds.dropna(axis=1,inplace=True)
 
     #savepath='/Users/pengwang/Dropbox/finance/ttest.csv'
+    errors.to_csv(errorpath)
     ds.to_csv(savepath)
     return ds
 

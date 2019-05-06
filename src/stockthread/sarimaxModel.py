@@ -150,8 +150,8 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
             paracollector=params.append(p,ignore_index=True)
             print('params exist:',parameters)
             p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
-    
-            paracollector.to_csv(paramPath)  
+            with open(paramPath,'a') as f:
+                paracollector.to_csv(f,header=False)  
     else:
         parameters=selectParameters(ticker,y,steps=steps,disp=False)
  
@@ -159,8 +159,9 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
         paracollector=params.append(p,ignore_index=True)
         print('params exist:',parameters)
         p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
-
-        paracollector.to_csv(paramPath)
+        with open(paramPath,'a') as f:
+            paracollector.to_csv(f,header=False) 
+        
     return sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
 
 #data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
