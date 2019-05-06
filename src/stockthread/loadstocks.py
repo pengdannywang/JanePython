@@ -57,7 +57,8 @@ def loadStocksByTickers(scraped_tickers,path,filename,months=18):
                     start=getStartDate(end,months).date()
                     print(item,'new date::',start,end,start<end)
                     ds[item]=web.DataReader(item,"yahoo",start,end)['Adj Close']
-
+            else:
+                print('error==',item)
         except Exception as e: 
             print(item,'error',e)
             da=pd.DataFrame([item],columns=errors.columns)

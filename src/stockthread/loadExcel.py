@@ -47,7 +47,7 @@ def main(argv):
         elif opt in ("-m", "--max"):
             rmax = arg
     inputfile=path+inputfile
-    outputfile=path+outputfile
+
     
     executeProgram(inputfile,outputfile,r_low=rlow,r_max=rmax)
         
@@ -55,7 +55,7 @@ def executeProgram(inputfile,outputfile,r_low=0,r_max=500):
 
     tickers=loadAuTickersFromYahooExcel(inputfile)
     tickers=tickers[r_low:r_max]
-    stocks=loadStocksByTickers(tickers,outputfile)
+    stocks=loadStocksByTickers(tickers,path,outputfile)
 
     data=stocks.resample('MS').mean()
     result=pd.DataFrame()
