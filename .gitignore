@@ -1,0 +1,9 @@
+.idea
+**/__pycache*
+
+src/realestate*
+src/sci*
+src/source*
+src
+.project
+*.csv
