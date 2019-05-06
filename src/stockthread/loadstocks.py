@@ -28,39 +28,33 @@ def loadStocksByTickers(scraped_tickers,savepath,months=18):
     file=pd.DataFrame()
     exists = os.path.isfile(savepath)
     ds =pd.DataFrame()
-    start=getStartDate(end,months).date()
+    
     if exists:
         file=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
-        if len(file)>0:
-            start=file.index[-1]
-            start=start.date()
-            for item in scraped_tickers:
-                try:
-                    print(item,'file exist date::',start,end,start<end)
-                    res=None
-                    
-                    if(start<end):
-                        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
-                        res=file[item].combine_first(remains)
-            
-                    else:
-                        res=file[item]
-                    
-                    ds[item] =res
-                except Exception as e: 
-                    print(item,'error',e)
-                    pass
-    else:
-        
-        for item in scraped_tickers:
-            try:
-                print(item,'date::',start,end,start<end)
+
+    for item in scraped_tickers:
+        try:
+            if(exists and file.columns.contains(item)):
+                start=file['REA.AX'].index[-1].date()
+                print(item,' exist date::',start,end,start<end)
                 res=None
-                res=web.DataReader(item,"yahoo",start,end)['Adj Close']
+    
+                if(start<end):
+                    remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
+                    res=file[item].combine_first(remains)
+                else:
+                    res=file[item]
+    
                 ds[item] =res
-            except Exception as e: 
-                print(item,'error',e)
-                pass
+            else:
+                start=getStartDate(end,months).date()
+                print(item,'new date::',start,end,start<end)
+                ds[item]=web.DataReader(item,"yahoo",start,end)['Adj Close']
+
+        except Exception as e: 
+            print(item,'error',e)
+            pass
+    
     ds.dropna(axis=1,inplace=True)
 
     #savepath='/Users/pengwang/Dropbox/finance/ttest.csv'
