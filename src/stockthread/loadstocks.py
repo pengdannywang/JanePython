@@ -41,7 +41,6 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
     
     for item in scraped_tickers:
         try:
-            print(len(errors)==0 , errors['item'].str.contains(item).any())
             if  len(errors)>0 and errors['item'].str.contains(item).any():
                 print(item,'exists in errors.csv')
             else:
@@ -78,12 +77,21 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
     ds.to_csv(savepath)
     return ds
 
-def loadAuTickersFromYahooExcel(inputFile):
+
+def loadAuInfoTickersFromYahooExcel(inputFile):
 
     stock_names=pd.read_excel(inputFile,header=3,usecols=4)
     
     au_stocks=stock_names[stock_names['Country']=='Australia']
-    au_tickers=au_stocks[au_stocks['Category Name'].str.contains('Information',regex=True,na=False)]['Ticker']
+    au_tickers=au_stocks[au_stocks['Category Name']=='Apparel Stores']['Ticker']
+    scraped_tickers =au_tickers.tolist()
+    return scraped_tickers
+def loadAuNotNaTickersFromYahooExcel(inputFile):
+
+    stock_names=pd.read_excel(inputFile,header=3,usecols=4)
+    
+    au_stocks=stock_names[stock_names['Country']=='Australia']
+    au_tickers=au_stocks[au_stocks['Ticker'].notna()]['Ticker']
     scraped_tickers =au_tickers.tolist()
     return scraped_tickers
 
