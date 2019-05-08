@@ -134,7 +134,6 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
     if(exists):
         params=pd.read_csv(paramPath,index_col=0)
     
-    print(params)
     p1,p2,t=[],[],''
 
     if (len(params)>0 and params.index.contains(ticker)):
