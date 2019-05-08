@@ -130,39 +130,38 @@ def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=Fal
 
 def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
     exists = os.path.isfile(paramPath)
-    params=pd.DataFrame()
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
     if(exists):
         params=pd.read_csv(paramPath,index_col=0)
-
     
+    print(params)
     p1,p2,t=[],[],''
 
-    if (len(params.index)>0 and pd.Series(params.iloc[:,0]==ticker).any()):
-        p=params[params.iloc[:,0]==ticker]
-        if len(p.index)>0:
-
-            li=p.values.tolist()[0]
-            p1,p2,t=li[1:4],li[4:8],li[8]
-        else:
-            parameters=selectParameters(ticker,y,steps=steps,disp=False)
- 
-            p=pd.DataFrame([parameters],columns=params.columns)
-            paracollector=params.append(p,ignore_index=True)
-            print('params exist:',parameters)
-            p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
-            with open(paramPath,'a') as f:
-                paracollector.to_csv(f,header=False)  
+    if (len(params)>0 and params.index.contains(ticker)):
+        li=params.loc[ticker].tolist()
+        
+        print('params exist:',li)
+        p1,p2,t=li[1:4],li[4:8],li[8]
+       
     else:
         parameters=selectParameters(ticker,y,steps=steps,disp=False)
- 
-        p=pd.DataFrame([parameters],columns=params.columns)
-        paracollector=params.append(p,ignore_index=True)
-        print('params exist:',parameters)
         p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
-        with open(paramPath,'a') as f:
-            paracollector.to_csv(f,header=False) 
+        print('new calculated parameter:',parameters)
+        params.loc[ticker]=parameters[1:]
         
-    return sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+        params.to_csv(paramPath) 
+    try: 
+        result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+    except Exception as e: 
+        print('unable to do prediction,recalculate parameter for ',ticker)
+        parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+        print('new calculated parameter:',parameters)
+        params.loc[ticker]=parameters[1:]
+        
+        params.to_csv(paramPath)  
+        result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+    return result
 
 #data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
 

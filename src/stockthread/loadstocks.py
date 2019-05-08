@@ -46,10 +46,10 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
             else:
                 if(exists and ds.columns.contains(item)):
                     start=ds[item].index[-1].date()
-                    print(item,' exist date::',start,end,start<end)
+                    print(item,' exist in stocks.csv and going to update between',start,end,start<end)
                     res=None
     
-                    if(start<end):
+                    if(start<end-1):
                         remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
                         res=file[item].combine_first(remains)
                     else:
@@ -58,15 +58,15 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
                     ds[item] =res
                 else:
                     start=getStartDate(end,months).date()
-                    print(item,'new date2::',start,end,start<end)
+                    print(item,'is not in stocks.csv and going to load from yahoo',start,end,start<end)
                     res=web.DataReader(item,"yahoo",start,end)['Adj Close']
                     ds[item]=res
         
         except Exception as e: 
     
             da=pd.DataFrame([item],columns=errors.columns)
+            print(item,'write in errors.csv',e)
             if(not str(e).find('No data fetched for symbol')==-1):
-                print(item,'write in errors.csv',e)
                 errors=errors.append(da,ignore_index=True)
             pass
     if(ds.isna().all().sum()>0):
