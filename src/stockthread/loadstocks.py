@@ -27,8 +27,9 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
     savepath=path+outputfile
     errorpath=path+'errors.csv'
     #end =datetime.datetime(end.year,end.month,1).date()
-    file=pd.DataFrame()
+    
     ds =pd.DataFrame()
+    exist_ds=pd.DataFrame()
     errors=pd.DataFrame([],columns=['item'])
     errorexists=os.path.isfile(errorpath)
     print('exists error',errorexists)
@@ -37,30 +38,32 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
     exists = os.path.isfile(savepath)
     print(savepath,'exists file',exists)
     if exists:
-        ds=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
+        exist_ds=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
     
     for item in scraped_tickers:
         try:
             if  len(errors)>0 and errors['item'].str.contains(item).any():
-                print(item,'exists in errors.csv')
+                print(item,'occured an exception before. skip this time.')
             else:
-                if(exists and ds.columns.contains(item)):
-                    start=ds[item].index[-1].date()
+                if(exists and exist_ds.columns.contains(item)):
+                    start=exist_ds[item].index[-1].date()
                     print(item,' exists and update between',start,end,start<end)
                     res=None
-    
-                    if(start<end-1):
-                        remains=web.DataReader(item,"yahoo",start,end)['Adj Close']              
-                        res=file[item].combine_first(remains)
+                    new_end=end-timedelta(days=1)
+                    if(start<new_end):
+                        remains=web.DataReader(item,"yahoo",start,new_end)['Adj Close']              
+                        res=exist_ds[item].combine_first(remains)
                     else:
-                        res=file[item]
+                        res=exist_ds[item]
     
-                    ds[item] =res
+                    exist_ds[item] =res
+                    ds[item]=res
                 else:
                     start=getStartDate(end,months).date()
-                    print(item,'is new and going to load from yahoo',start,end,start<end)
+                    print(item,'is new and load from yahoo between',start,end,start<end)
                     res=web.DataReader(item,"yahoo",start,end)['Adj Close']
                     ds[item]=res
+                    exist_ds[item] =res
         
         except Exception as e: 
     
@@ -69,12 +72,12 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
             if(not str(e).find('No data fetched for symbol')==-1):
                 errors=errors.append(da,ignore_index=True)
             pass
-    if(ds.isna().all().sum()>0):
-        ds[ds.columns[ds.isna().all()]].dropna(axis=1,inplace=True)
-    ds.columns[ds.isna().any()].any()
+    if(exist_ds.isna().all().sum()>0):
+        exist_ds[exist_ds.columns[exist_ds.isna().all()]].dropna(axis=1,inplace=True)
+    exist_ds.columns[exist_ds.isna().any()].any()
     #savepath='/Users/pengwang/Dropbox/finance/ttest.csv'
     errors.to_csv(errorpath)
-    ds.to_csv(savepath)
+    exist_ds.to_csv(savepath)
     return ds
 
 
@@ -91,7 +94,7 @@ def loadAuNotNaTickersFromYahooExcel(inputFile):
     stock_names=pd.read_excel(inputFile,header=3,usecols=4)
     
     au_stocks=stock_names[stock_names['Country']=='Australia']
-    au_tickers=au_stocks[au_stocks['Category Name'].notna()]['Ticker']
+    au_tickers=au_stocks[au_stocks['Ticker'].notna()]['Ticker']
     scraped_tickers =au_tickers.tolist()
     return scraped_tickers
 

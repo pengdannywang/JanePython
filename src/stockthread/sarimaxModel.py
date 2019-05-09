@@ -1,6 +1,6 @@
 import pandas as pd
 
-
+import pandas_datareader.data as web 
 import statsmodels.api as sm
 import os
 # SARIMAX example
@@ -13,7 +13,7 @@ import matplotlib.pylab as plt
 import itertools
 import math
 import warnings
-
+import datetime
 warnings.filterwarnings('ignore')
 
 def measure_rmse(actual, predicted):
@@ -107,6 +107,7 @@ def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=Fal
     except Exception as e: 
         print('sarimaxPrdict has a exception for:',ticker,p_order,p_seasonal_order,trend,steps,e,'return None')
         return None
+    pred=train_y[-1:].append(pred)
     if disp:
         pred_ci=pd.DataFrame(index=pred.index)
         pred_ci['low'] = pred-pred*0.05
@@ -127,6 +128,8 @@ def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=Fal
         plt.legend()
         
         plt.show()
+    
+
     return pred
 
 def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
@@ -170,6 +173,20 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
             print('fatal erros for ',ticker,'errors:',e)
     return result
 
+def predictbyticker(ticker,period='MS',months=18,steps=2,disp=False):
+    end = datetime.date.today()
+    day=end.day
+    year=end.year-months//12-1
+    month=months%12+1
+    start=datetime.datetime(year,month,day)
+    
+    y=web.DataReader(ticker,"yahoo",start,end)['Adj Close']   
+    y=y.resample(period).mean()
+    parameters=selectParameters(ticker,y,steps=steps,disp=False)
+    p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+    result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+
+    return result
 #data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
 
 #data=data.resample('MS').mean()
