@@ -63,18 +63,15 @@ def selectParameters(ticker,y,steps=3,disp=False):
 
                     #print('ARIMA{} error:{}'.format(param,e))
                     error=error.append([list(param)+list(param_seasonal)+[t]],ignore_index=True)
-
                     pass
     print(parameters)
     #model_fit=model.fit(disp=0)
     if disp:  
-
-        print(parameters)
         pred_ci=pd.DataFrame(index=forcast.index)
         pred_ci['low'] = forcast-forcast*0.05
         pred_ci['upper'] = forcast+forcast*0.05
         
-        
+     
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
         ax = y.plot(label='observed')
@@ -95,17 +92,21 @@ def selectParameters(ticker,y,steps=3,disp=False):
 
 
 def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
+    pred=None
+    try:
+        model = sm.tsa.statespace.SARIMAX(train_y,
+                                             order=p_order,
+                                             seasonal_order=p_seasonal_order,
+                                             trend=trend,
+                                             enforce_stationarity=False,
+                                             enforce_invertibility=False)
 
-    model = sm.tsa.statespace.SARIMAX(train_y,
-                                         order=p_order,
-                                         seasonal_order=p_seasonal_order,
-                                         trend=trend,
-                                         enforce_stationarity=False,
-                                         enforce_invertibility=False)
+        model_fit = model.fit(disp=False)
 
-    model_fit = model.fit(disp=False)
-
-    pred=model_fit.forecast(steps=steps)
+        pred=model_fit.forecast(steps=steps)
+    except Exception as e: 
+        print('sarimaxPrdict has a exception for:',ticker,p_order,p_seasonal_order,trend,steps,e,'return None')
+        return None
     if disp:
         pred_ci=pd.DataFrame(index=pred.index)
         pred_ci['low'] = pred-pred*0.05
@@ -135,31 +136,38 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
         params=pd.read_csv(paramPath,index_col=0)
     
     p1,p2,t=[],[],''
-
+    result=None
     if (len(params)>0 and params.index.contains(ticker)):
         li=params.loc[ticker].tolist()
-        
-        print('params exist:',li)
-        p1,p2,t=li[1:4],li[4:8],li[8]
+        print(ticker,'exists in parameters:',li)
+        p1,p2,t=li[0:3],li[3:7],li[7]
        
     else:
         parameters=selectParameters(ticker,y,steps=steps,disp=False)
-        p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
         print('new calculated parameter:',parameters)
-        params.loc[ticker]=parameters[1:]
-        
-        params.to_csv(paramPath) 
+        if(len(parameters)>8):
+            p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+            
     try: 
-        result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+        if not (p1==[] or p2==[] or t==''):
+            result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
     except Exception as e: 
-        print('unable to do prediction,recalculate parameter for ',ticker)
-        parameters=selectParameters(ticker,y,steps=steps,disp=False)
-        p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
-        print('new calculated parameter:',parameters)
-        params.loc[ticker]=parameters[1:]
-        
-        params.to_csv(paramPath)  
-        result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+        print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
+        try:
+            parameters=selectParameters(ticker,y,steps=steps,disp=False)
+            print('recalculated parameter:',parameters)
+            if(len(parameters)>8):
+                p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+                params.loc[ticker]=parameters[1:]
+                params.to_csv(paramPath)  
+
+                result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+            else:
+                print('unable to forcast for ',ticker)
+        except Exception as e: 
+            print('fatal erros for ',ticker,'errors:',e)
     return result
 
 #data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')

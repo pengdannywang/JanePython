@@ -46,7 +46,7 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
             else:
                 if(exists and ds.columns.contains(item)):
                     start=ds[item].index[-1].date()
-                    print(item,' exist in stocks.csv and going to update between',start,end,start<end)
+                    print(item,' exists and update between',start,end,start<end)
                     res=None
     
                     if(start<end-1):
@@ -58,7 +58,7 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
                     ds[item] =res
                 else:
                     start=getStartDate(end,months).date()
-                    print(item,'is not in stocks.csv and going to load from yahoo',start,end,start<end)
+                    print(item,'is new and going to load from yahoo',start,end,start<end)
                     res=web.DataReader(item,"yahoo",start,end)['Adj Close']
                     ds[item]=res
         
@@ -91,7 +91,7 @@ def loadAuNotNaTickersFromYahooExcel(inputFile):
     stock_names=pd.read_excel(inputFile,header=3,usecols=4)
     
     au_stocks=stock_names[stock_names['Country']=='Australia']
-    au_tickers=au_stocks[au_stocks['Ticker'].notna()]['Ticker']
+    au_tickers=au_stocks[au_stocks['Category Name'].notna()]['Ticker']
     scraped_tickers =au_tickers.tolist()
     return scraped_tickers
 
