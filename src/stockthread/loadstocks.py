@@ -78,9 +78,16 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
     #savepath='/Users/pengwang/Dropbox/finance/ttest.csv'
     errors.to_csv(errorpath)
     exist_ds.to_csv(savepath)
+    ds=deal_missing_data(ds)
     return ds
 
-
+def deal_missing_data(data):
+    for item in data.columns:
+        temp=pd.DataFrame(data[item])
+        if(pd.isna(temp.iloc[-5:].values).sum()>3):
+            data=data.drop(item,axis=1)
+    data.bfill().fillna(method='pad', limit=1)
+    return data
 def loadAuInfoTickersFromYahooExcel(inputFile):
 
     stock_names=pd.read_excel(inputFile,header=3,usecols=4)
