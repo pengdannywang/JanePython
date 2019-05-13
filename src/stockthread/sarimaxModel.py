@@ -116,7 +116,7 @@ def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=Fal
         
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
-        ax = train_y['2018':].plot(label='observed')
+        ax = train_y['2019-05':].plot(label='observed')
         pred.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(pred.index,
@@ -172,6 +172,28 @@ def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
         except Exception as e: 
             print('fatal erros for ',ticker,'errors:',e)
     return result
+def quickParameters(paramPath,ticker,y,steps=2,disp=False):
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+    
+
+    parameters=[]
+    if (len(params)>0 and params.index.contains(ticker)):
+        parameters=[ticker]+params.loc[ticker].tolist()
+        print(ticker,'exists in parameters:',parameters)
+        
+       
+    else:
+        parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        print('new calculated parameter:',parameters)
+        if(len(parameters)>8):
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+            
+    return parameters
+
 
 def predictbyticker(ticker,period='MS',months=18,steps=2,disp=False):
     end = datetime.date.today()
