@@ -14,6 +14,7 @@ import itertools
 import math
 import warnings
 import datetime
+from datetime import timedelta
 warnings.filterwarnings('ignore')
 
 def measure_rmse(actual, predicted):
@@ -91,7 +92,7 @@ def selectParameters(ticker,y,steps=3,disp=False):
     return parameters
 
 
-def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
+def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=False,days=90):
     pred=None
     try:
         model = sm.tsa.statespace.SARIMAX(train_y,
@@ -113,10 +114,13 @@ def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=Fal
         pred_ci['low'] = pred-pred*0.05
         pred_ci['upper'] = pred+pred*0.05
         
+        end = datetime.date.today()
+        delta=timedelta(days=days)
         
+        chart_start_day=end-delta
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
-        ax = train_y['2019-05':].plot(label='observed')
+        ax = train_y[chart_start_day:].plot(label='observed')
         pred.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(pred.index,

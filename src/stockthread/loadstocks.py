@@ -78,16 +78,9 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
     #savepath='/Users/pengwang/Dropbox/finance/ttest.csv'
     errors.to_csv(errorpath)
     exist_ds.to_csv(savepath)
-    ds=deal_missing_data(ds)
     return ds
 
-def deal_missing_data(data):
-    for item in data.columns:
-        temp=pd.DataFrame(data[item])
-        if(pd.isna(temp.iloc[-5:].values).sum()>3):
-            data=data.drop(item,axis=1)
-    data.bfill().fillna(method='pad', limit=1)
-    return data
+
 def loadAuInfoTickersFromYahooExcel(inputFile):
 
     stock_names=pd.read_excel(inputFile,header=3,usecols=4)
@@ -104,7 +97,14 @@ def loadAuNotNaTickersFromYahooExcel(inputFile):
     au_tickers=au_stocks[au_stocks['Ticker'].notna()]['Ticker']
     scraped_tickers =au_tickers.tolist()
     return scraped_tickers
+def loadUSANotNaTickersFromYahooExcel(inputFile):
 
+    stock_names=pd.read_excel(inputFile,header=3,usecols=4)
+    
+    au_stocks=stock_names[stock_names['Country']=='USA']
+    au_tickers=au_stocks[au_stocks['Ticker'].notna()]['Ticker']
+    scraped_tickers =au_tickers.tolist()
+    return scraped_tickers
 def main(argv):
     path='U:/python/JanePython/'
     inputfile = 'Yahoo.xlsx'
