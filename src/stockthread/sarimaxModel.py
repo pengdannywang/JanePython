@@ -75,7 +75,7 @@ def selectParameters(ticker,y,steps=3,disp=False):
      
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
-        ax = y.plot(label='observed')
+        ax = y['2019-01-01':].plot(label='observed')
         forcast.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(forcast.index,
