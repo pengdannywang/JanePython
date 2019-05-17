@@ -1,9 +1,8 @@
 import pandas as pd
 
-from datetime import datetime
-import pandas_datareader.data as web
+import pandas_datareader.data as web 
 import statsmodels.api as sm
-
+import os
 # SARIMAX example
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
@@ -14,13 +13,14 @@ import matplotlib.pylab as plt
 import itertools
 import math
 import warnings
-
+import datetime
+from datetime import timedelta
 warnings.filterwarnings('ignore')
 
 def measure_rmse(actual, predicted):
-	return math.sqrt(mean_squared_error(actual, predicted))
+    return math.sqrt(mean_squared_error(actual, predicted))
 
-def selectParameters(y,steps=3,disp=False):
+def selectParameters(ticker,y,steps=3,disp=False):
     train_y, test_y = y[:-steps], y[-steps:]
     # Define the p, d and q parameters to take any value between 0 and 2
     p = d = q = range(0, 2)
@@ -57,27 +57,26 @@ def selectParameters(y,steps=3,disp=False):
                     mses=mses.append([list(param)+list(param_seasonal)+[t]+[model_fit.aic]+[mse]],ignore_index=True)
 
                     if parameters==[] or parameters[-1]>mse:
-                        parameters=list(param)+list(param_seasonal)+[t]+[model_fit.aic]+[mse]
+                        parameters=[ticker]+list(param)+list(param_seasonal)+[t]+[model_fit.aic]+[mse]
                         forcast=pred
                     
                 except :
 
                     #print('ARIMA{} error:{}'.format(param,e))
                     error=error.append([list(param)+list(param_seasonal)+[t]],ignore_index=True)
-
                     pass
+    print(parameters)
     #model_fit=model.fit(disp=0)
-    if disp:  
-
-        print(parameters)
+    if disp:
+        print('forcast::',forcast)
         pred_ci=pd.DataFrame(index=forcast.index)
         pred_ci['low'] = forcast-forcast*0.05
         pred_ci['upper'] = forcast+forcast*0.05
         
-        
+     
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
-        ax = y['2018':].plot(label='observed')
+        ax = y['2019-01-01':].plot(label='observed')
         forcast.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(forcast.index,
@@ -85,38 +84,44 @@ def selectParameters(y,steps=3,disp=False):
                         pred_ci.iloc[:,1], color='k', alpha=.1)
         
         ax.set_xlabel('Date')
-        ax.set_ylabel(y.name)
+        ax.set_ylabel(ticker)
         plt.legend()
         
         plt.show()
-    p1,p2,t,err=parameters[0:3],parameters[3:7],parameters[7],parameters[-1]
-
-    return p1,p2,t,err
 
 
-def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
-    
-    model = sm.tsa.statespace.SARIMAX(train_y,
-                                         order=p_order,
-                                         seasonal_order=p_seasonal_order,
-                                         trend=trend,
-                                         enforce_stationarity=False,
-                                         enforce_invertibility=False)
+    return parameters
 
-    model_fit = model.fit(disp=False)
 
-    pred=model_fit.forecast(steps=steps)
+def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=False,days=90):
+    pred=None
+    try:
+        model = sm.tsa.statespace.SARIMAX(train_y,
+                                             order=p_order,
+                                             seasonal_order=p_seasonal_order,
+                                             trend=trend,
+                                             enforce_stationarity=False,
+                                             enforce_invertibility=False)
+
+        model_fit = model.fit(disp=False)
+
+        pred=model_fit.forecast(steps=steps)
+    except Exception as e: 
+        print('sarimaxPrdict has a exception for:',ticker,p_order,p_seasonal_order,trend,steps,e,'return None')
+        return None
+    pred=train_y[-1:].append(pred)
     if disp:
-        
         pred_ci=pd.DataFrame(index=pred.index)
         pred_ci['low'] = pred-pred*0.05
         pred_ci['upper'] = pred+pred*0.05
         
+        end = datetime.date.today()
+        delta=timedelta(days=days)
         
+        chart_start_day=end-delta
         #pred_ci.loc[y.index[-1]]=[y[-1],y[-1]]
         #pred_ci=pred_ci.sort_index()
-        ax = train_y['2018':].plot(label='observed')
-        
+        ax = train_y[chart_start_day:].plot(label='observed')
         pred.plot(ax=ax, label='Forecast', alpha=.7)
         
         ax.fill_between(pred.index,
@@ -124,23 +129,138 @@ def sarimaxPrdict(train_y,p_order,p_seasonal_order,trend,steps=1,disp=False):
                         pred_ci.iloc[:,1], color='k', alpha=.1)
         
         ax.set_xlabel('Date')
-        ax.set_ylabel(train_y.name)
+        ax.set_ylabel(ticker)
         plt.legend()
+        
         plt.show()
+    
+
     return pred
+def dynamicForacast(ticker,y,steps=2,disp=False):
+    paramPath='/root/pythondev/JanePython/parameters.csv'
+    p1,p2,t=[],[],''
+    result=None
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+    try:
+        parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        print('new calculated parameter:',parameters)
+        if(len(parameters)>8):
+            p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+ 
+        if not (p1==[] or p2==[] or t==''):
+            result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+    except Exception as e: 
+        print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
+        pass
+        
+    return result
+def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+    
+    p1,p2,t=[],[],''
+    result=None
+    if (len(params)>0 and params.index.contains(ticker)):
+        li=params.loc[ticker].tolist()
+        print(ticker,'exists in parameters:',li)
+        p1,p2,t=li[0:3],li[3:7],li[7]
+       
+    else:
+        parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        print('new calculated parameter:',parameters)
+        if(len(parameters)>8):
+            p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+            
+    try: 
+        if not (p1==[] or p2==[] or t==''):
+            result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+    except Exception as e: 
+        print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
+        try:
+            parameters=selectParameters(ticker,y,steps=steps,disp=False)
+            print('recalculated parameter:',parameters)
+            if(len(parameters)>8):
+                p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+                params.loc[ticker]=parameters[1:]
+                params.to_csv(paramPath)  
 
-#data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
+                result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+            else:
+                print('unable to forcast for ',ticker)
+        except Exception as e: 
+            print('fatal erros for ',ticker,'errors:',e)
+    return result
+def quickParameters(paramPath,ticker,y,steps=2,disp=False):
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+    
 
-#data=data.resample('MS').mean()
-#start=datetime('2017-01-01')
-#end=datetime.now()
-#y=web.DataReader('^RUT',"yahoo",start,end)['Adj Close'].resample('M').pad()
-#
-#
-#para=selectParameters(y,steps=2,disp=True)
-#end=datetime.now()
-#period=end-start
-#
-#print('period:',period.seconds)
+    parameters=[]
+    if (len(params)>0 and params.index.contains(ticker)):
+        parameters=[ticker]+params.loc[ticker].tolist()
+        print(ticker,'exists in parameters:',parameters)
+        
+       
+    else:
+        parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        print('new calculated parameter:',parameters)
+        if(len(parameters)>8):
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+            
+    return parameters
+
+
+def predictbyticker(ticker,period='MS',months=18,steps=2,disp=False):
+    end = datetime.date.today()
+    day=end.day
+    year=end.year-months//12-1
+    month=months%12+1
+    start=datetime.datetime(year,month,day)
+    
+    y=web.DataReader(ticker,"yahoo",start,end)['Adj Close']   
+    y=y.resample(period).mean()
+    parameters=selectParameters(ticker,y,steps=steps,disp=False)
+    p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+    result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+
+    return result
+
+
+path='/root/pythondev/JanePython/'
+inputfile = path+'Yahoo.xlsx'
+outputfile = 'stocks2.csv'
+
+savepath=path+outputfile
+stocks=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
+data=stocks.resample('MS').mean()
+result=pd.DataFrame()
+for ticker in data.columns:
+    print(ticker)
+    res=dynamicForacast(ticker,data[ticker])
+    if(res is not None):
+        result[ticker]=res
+#dd=pd.DataFrame()        
+#sres=result.transpose().sort_values(by='2019-06-01',ascending=False)
+#rate=sres['2019-07-01']/sres['2019-05-01'] 
+#x=rate*1000-1000
+#dd['benefit']=x
+#dd['rate']=rate
+#dd['2019-05-01']=sres['2019-05-01']
+#dd['2019-06-01']=sres['2019-06-01']
+#dd['2019-07-01']=sres['2019-07-01']
+#dd.sort_values(by='benefit',ascending=False).head(30)
+result.to_csv(path+'/monthlypredicts.csv')
 
         

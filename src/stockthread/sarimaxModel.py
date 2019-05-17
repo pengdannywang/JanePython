@@ -67,7 +67,8 @@ def selectParameters(ticker,y,steps=3,disp=False):
                     pass
     print(parameters)
     #model_fit=model.fit(disp=0)
-    if disp:  
+    if disp:
+        print('forcast::',forcast)
         pred_ci=pd.DataFrame(index=forcast.index)
         pred_ci['low'] = forcast-forcast*0.05
         pred_ci['upper'] = forcast+forcast*0.05
@@ -135,7 +136,28 @@ def sarimaxPrdict(ticker,train_y,p_order,p_seasonal_order,trend,steps=1,disp=Fal
     
 
     return pred
-
+def dynamicForacast(ticker,y,steps=2,disp=False):
+    paramPath='/root/pythondev/JanePython/parameters1.csv'
+    p1,p2,t=[],[],''
+    result=None
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+    parameters=selectParameters(ticker,y,steps=steps,disp=False)
+    print('new calculated parameter:',parameters)
+    if(len(parameters)>8):
+        p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+ 
+    try: 
+        if not (p1==[] or p2==[] or t==''):
+            result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+    except Exception as e: 
+        print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
+        
+    return result
 def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
     exists = os.path.isfile(paramPath)
     params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])

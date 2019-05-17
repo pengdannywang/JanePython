@@ -1,20 +1,24 @@
-import pandas as pd
-from datetime import datetime
-import statsmodels.api as sm
 
+import pandas as pd
+
+import pandas_datareader.data as web 
+import statsmodels.api as sm
+import os
 # SARIMAX example
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+
 from sklearn.metrics import mean_squared_error
-
-
-import queue
-import threading
 
 
 import matplotlib.pylab as plt
 import itertools
 import math
 import warnings
+import datetime
+from datetime import timedelta
+import queue
+import threading
+
 warnings.filterwarnings('ignore')
 
 def measure_rmse(actual, predicted):
@@ -25,11 +29,11 @@ def measure_rmse(actual, predicted):
 def sarimaxPrdict(train_y, p_order, p_seasonal_order, vtrend, steps=1, disp=False):
 
     model = SARIMAX(train_y,
-                                      order=p_order,
-                                      seasonal_order=p_seasonal_order,
-                                      trend=vtrend,
-                                      enforce_stationarity=False,
-                                      enforce_invertibility=False)
+          order=p_order,
+          seasonal_order=p_seasonal_order,
+          trend=vtrend,
+          enforce_stationarity=False,
+          enforce_invertibility=False)
 
     model_fit = model.fit(disp=False)
 
@@ -61,30 +65,35 @@ def sarimaxPrdict(train_y, p_order, p_seasonal_order, vtrend, steps=1, disp=Fals
 
 
 class myThread (threading.Thread):
-    def __init__(self,threadId,param,param_seasonal,trend,train_y,test_y):
+    def __init__(self,ticker,param,param_seasonal,trend,train_y,test_y):
         threading.Thread.__init__(self)
         self.train_y=train_y
         self.test_y=test_y
         self.param=param
         self.param_seasonal=param_seasonal
         self.trend=trend
-        self.mse=-1
-        self.threadId=threadId
-        
+        self.mse=1000
+        self.ticker=ticker
+        self.aic=-1
     def run(self):
-     
-        self.mse=sarimaxTest(self.param,self.param_seasonal,self.trend,self.train_y,self.test_y)
+        try:
+            self.aic,self.mse=sarimaxTest(self.param,self.param_seasonal,self.trend,self.train_y,self.test_y)
+        except:
+            print('except',self.aic)
+            self.aic,self.mse=-1,1000
+            pass
             
         
     def get_mse(self):
         return self.mse
 
     def get_param(self):
-        return self.param,self.param_seasonal,self.trend
+        return [[self.ticker]+list(self.param)+list(self.param_seasonal)+[self.trend,self.aic,self.mse]]
     
     
 def sarimaxTest(param,param_seasonal,trend,train_y,test_y):
-    mse=-1
+    mse=1000
+
     try:
         model = sm.tsa.statespace.SARIMAX(train_y,
                              order=param,
@@ -100,13 +109,14 @@ def sarimaxTest(param,param_seasonal,trend,train_y,test_y):
 #            print(test_y)
         #print('mse:{}'.format(mean_squared_error(test_y,pred)))
         mse=measure_rmse(test_y,pred)
-        
+        return model_fit.aic,mse
     except :
-        mse=-1
+        pass
+        
+    return -1,1000
+    
 
-    return mse
-
-def optimizeParameter(y, steps=6,disp=False):
+def optimizeParameter(ticker,y, steps=6,disp=False):
     train_y, test_y = y[:-steps], y[-steps:]
       # Define the p, d and q parameters to take any value between 0 and 2
     p = d = q = range(0, 2)
@@ -121,22 +131,22 @@ def optimizeParameter(y, steps=6,disp=False):
     mses=pd.DataFrame()
     threads=[]
     q = queue.Queue()
-    threadId=1
+
     for param in pdq:
         for t in trend_c:
             for param_seasonal in seasonal_pdq:
                 
-                thread=myThread(threadId,param,param_seasonal,t,train_y,test_y)
+                thread=myThread(ticker,param,param_seasonal,t,train_y,test_y)
                 thread.start()
                 threads.append(thread)
-                threadId+=1
+    
 
     for thread in threads :
         thread.join()
         mse=thread.get_mse()
         if(mse>0  ):
-            param,param_seasonal,t=thread.get_param()
-            mses=mses.append([list(param)+list(param_seasonal)+[t]+[mse]],ignore_index=True)
+            param=thread.get_param()
+            mses=mses.append(param,ignore_index=True)
 
     parameter=[]
     if len(mses)>0:     
@@ -146,7 +156,7 @@ def optimizeParameter(y, steps=6,disp=False):
     # model_fit=model.fit(disp=0)
     if disp:
         print(parameter)
-        param,param_seasonal,trend=parameter[0:3],parameter[3:7],parameter[7]
+        param,param_seasonal,trend=parameter[1:4],parameter[4:8],parameter[8]
         model = sm.tsa.statespace.SARIMAX(train_y,
                                           order=param,
                                           seasonal_order=param_seasonal,
@@ -175,19 +185,45 @@ def optimizeParameter(y, steps=6,disp=False):
         plt.legend()
 
         plt.show()
-    
-    p1,p2,t,err=parameter[0:3],parameter[3:7],parameter[7],parameter[-1]
 
-    return p1,p2,t,err
+    return parameter
 
+def dynamicForacast(ticker,y,steps=2,disp=False):
+    paramPath='/root/pythondev/JanePython/parameters1.csv'
+    p1,p2,t=[],[],''
+    result=None
+    exists = os.path.isfile(paramPath)
+    params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
+    if(exists):
+        params=pd.read_csv(paramPath,index_col=0)
+    parameters=optimizeParameter(ticker,y,steps=steps,disp=False)
+    print('new calculated parameter:',parameters)
+    if(len(parameters)>8):
+        p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+ 
+    try: 
+        if not (p1==[] or p2==[] or t==''):
+            result=sarimaxPrdict(y,p1,p2,t,steps=3,disp=disp)
+            params.loc[ticker]=parameters[1:]
+            params.to_csv(paramPath) 
+    except Exception as e: 
+        print('unable to do prediction,parameter:',ticker, ' errors::',e)
+        
+    return result
 
-data=pd.read_csv('/Users/pengwang/work/stocks.csv',parse_dates=['Date'],index_col='Date')
+path='/root/pythondev/JanePython/'
+inputfile = path+'Yahoo.xlsx'
+outputfile = 'stocks2.csv'
+savepath=path+outputfile
+data=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
 
 data=data.resample('MS').mean()
-y=data['ABBV']
-start=datetime.now()
-para=optimizeParameter(y,steps=3,disp=False)
-end=datetime.now()
-period=end-start
 
-print('period:',period.seconds)
+result=pd.DataFrame()
+for ticker in data.columns:
+    print(ticker)
+    res=dynamicForacast(ticker,data[ticker])
+    if(res is not None):
+        result[ticker]=res
+
+result.to_csv(path+'/monthlypredicts.csv')

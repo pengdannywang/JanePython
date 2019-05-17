@@ -105,27 +105,6 @@ def loadUSANotNaTickersFromYahooExcel(inputFile):
     au_tickers=au_stocks[au_stocks['Ticker'].notna()]['Ticker']
     scraped_tickers =au_tickers.tolist()
     return scraped_tickers
-def main(argv):
-    path='U:/python/JanePython/'
-    inputfile = 'Yahoo.xlsx'
-    outputfile = 'predicts.csv'
-    try:
-        opts, args = getopt.getopt(argv,"hi:o:p:",["ifile=","ofile=","path="])
-    except getopt.GetoptError:
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print ('loadstocks.py -p <path> -i <inputfile> -o <outputfile>')
-            sys.exit()
-        elif opt in ("-p", "--path"):
-            path = arg
-        elif opt in ("-i", "--ifile"):
-            inputfile = arg
-        elif opt in ("-o", "--ofile"):
-            outputfile = arg
-    inputfile=path+inputfile
-    outputfile=path+outputfile
-    return inputfile,outputfile
 
 
 
