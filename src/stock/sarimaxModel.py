@@ -20,7 +20,7 @@ warnings.filterwarnings('ignore')
 def measure_rmse(actual, predicted):
     return math.sqrt(mean_squared_error(actual, predicted))
 
-def selectParameters(ticker,y,steps=3,disp=False):
+def selectParameters(ticker,y,steps=1,disp=False):
     train_y, test_y = y[:-steps], y[-steps:]
     # Define the p, d and q parameters to take any value between 0 and 2
     p = d = q = range(0, 2)

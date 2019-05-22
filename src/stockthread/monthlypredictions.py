@@ -8,7 +8,7 @@ outputfile = 'stocks2.csv'
 
 savepath=path+outputfile
 stocks=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
-data=stocks.resample('MS').mean()
+data=stocks.resample('W').mean()
 result=pd.DataFrame()
 for ticker in data.columns:
     print(ticker)

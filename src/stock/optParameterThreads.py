@@ -116,7 +116,7 @@ def sarimaxTest(param,param_seasonal,trend,train_y,test_y):
     return -1,1000
     
 
-def optimizeParameter(ticker,y, steps=6,disp=False):
+def optimizeParameter(ticker,y, steps=1,disp=False):
     train_y, test_y = y[:-steps], y[-steps:]
       # Define the p, d and q parameters to take any value between 0 and 2
     p = d = q = range(0, 2)
@@ -188,7 +188,7 @@ def optimizeParameter(ticker,y, steps=6,disp=False):
 
     return parameter
 
-def dynamicForacast(ticker,y,steps=2,disp=False):
+def dynamicForacast(ticker,y,steps=1,disp=False):
     paramPath='/root/pythondev/JanePython/parameters1.csv'
     p1,p2,t=[],[],''
     result=None
@@ -216,8 +216,8 @@ inputfile = path+'Yahoo.xlsx'
 outputfile = 'stocks2.csv'
 savepath=path+outputfile
 data=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
-
-data=data.resample('MS').mean()
+data=data[[col for col in data.columns if pd.Series(data[col].values>1).sum()>30]]
+data=data.resample('W').mean()
 
 result=pd.DataFrame()
 for ticker in data.columns:
@@ -226,4 +226,4 @@ for ticker in data.columns:
     if(res is not None):
         result[ticker]=res
 
-result.to_csv(path+'/monthlypredicts.csv')
+result.to_csv(path+'/weeklyforecast.csv')

@@ -22,7 +22,7 @@ def getStartDate(end,months):
     start=datetime.datetime(year,month,day)
     return start
 
-def loadStocksByTickers(scraped_tickers,path,outputfile,months=18):
+def loadStocksByTickers(scraped_tickers,path,outputfile,months=12):
     end = datetime.date.today()
     savepath=path+outputfile
     errorpath=path+'errors.csv'

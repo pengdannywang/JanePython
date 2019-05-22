@@ -158,7 +158,7 @@ def dynamicForacast(ticker,y,steps=2,disp=False):
         print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
         
     return result
-def forcastStocks(paramPath,ticker,y,steps=2,disp=False):
+def forcastStocks(paramPath,ticker,y,steps=1,disp=False):
     exists = os.path.isfile(paramPath)
     params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
     if(exists):
