@@ -8,7 +8,7 @@ outputfile = 'stocks2.csv'
 
 savepath=path+outputfile
 stocks=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
-data=stocks.resample('W').mean()
+data=stocks.resample('MS').mean()
 result=pd.DataFrame()
 for ticker in data.columns:
     print(ticker)
@@ -25,4 +25,4 @@ for ticker in data.columns:
 #dd['2019-06-01']=sres['2019-06-01']
 #dd['2019-07-01']=sres['2019-07-01']
 #dd.sort_values(by='benefit',ascending=False).head(30)
-result.to_csv(path+'/monthlypredicts.csv')
+result.to_csv(path+'/weeklyforecast.csv')
