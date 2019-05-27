@@ -108,9 +108,9 @@ def loadUSANotNaTickersFromYahooExcel(inputFile):
 
 path='/root/pythondev/JanePython/'
 inputfile = path+'ASXListedCompanies.csv'
-outputfile = 'stocks2.csv'
+outputfile = 'stocks.csv'
 
 da=pd.read_csv(inputfile,header=1)
-ticker=da.iloc[:,1].tolist()
+tickers=da.iloc[:,1].tolist()
 stocks=loadStocksByTickers(tickers,path,outputfile)
 stocks=loadStocksByTickers(tickers,path,outputfile)

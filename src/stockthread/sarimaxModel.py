@@ -65,6 +65,7 @@ def selectParameters(ticker,y,steps=3,disp=False):
                     #print('ARIMA{} error:{}'.format(param,e))
                     error=error.append([list(param)+list(param_seasonal)+[t]],ignore_index=True)
                     pass
+    parameters=[int(v) if ( (isinstance(v,(int,float)) or v.isdigit()) and i<7)  else v for i,v in enumerate(parameters)]
     print(parameters)
     #model_fit=model.fit(disp=0)
     if disp:
@@ -89,7 +90,7 @@ def selectParameters(ticker,y,steps=3,disp=False):
         
         plt.show()
 
-
+    
     return parameters
 
 
@@ -158,6 +159,9 @@ def dynamicForacast(ticker,y,steps=2,disp=False):
         print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
         
     return result
+
+# choose parameters ( it is very time consuming),parameters is stored in parameters.csv if it is changes or new.
+# forecast result
 def forcastStocks(paramPath,ticker,y,steps=1,disp=False):
     exists = os.path.isfile(paramPath)
     params=pd.DataFrame([],columns=['p1','p2','p3','p4','p5','p6','p7','trend','aic','mse'])
@@ -167,12 +171,14 @@ def forcastStocks(paramPath,ticker,y,steps=1,disp=False):
     p1,p2,t=[],[],''
     result=None
     if (len(params)>0 and params.index.contains(ticker)):
-        li=params.loc[ticker].tolist()
-        print(ticker,'exists in parameters:',li)
-        p1,p2,t=li[0:3],li[3:7],li[7]
+        parameters=params.loc[ticker].tolist()
+        parameters=[int(v) if ( (isinstance(v,(int,float)) or v.isdigit()) and i<7)  else v for i,v in enumerate(parameters)]
+        print(ticker,'exists in parameters:',parameters)
+        p1,p2,t=parameters[0:3],parameters[3:7],parameters[7]
        
     else:
         parameters=selectParameters(ticker,y,steps=steps,disp=False)
+        parameters=[int(v) if ( (isinstance(v,(int,float)) or v.isdigit()) and i<7)  else v for i,v in enumerate(parameters)]
         print('new calculated parameter:',parameters)
         if(len(parameters)>8):
             p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
@@ -182,10 +188,16 @@ def forcastStocks(paramPath,ticker,y,steps=1,disp=False):
     try: 
         if not (p1==[] or p2==[] or t==''):
             result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
+            if(result is None):
+                print('recalculated parameter:',parameters)
+                parameters=selectParameters(ticker,y,steps=steps,disp=False)
+                p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
+                result=sarimaxPrdict(ticker,y,p1,p2,t,steps=steps,disp=disp)
     except Exception as e: 
         print('unable to do prediction,recalculate parameter,',ticker, ' errors::',e)
         try:
             parameters=selectParameters(ticker,y,steps=steps,disp=False)
+            parameters=[int(v) if ( (isinstance(v,(int,float)) or v.isdigit()) and i<7)  else v for i,v in enumerate(parameters)]
             print('recalculated parameter:',parameters)
             if(len(parameters)>8):
                 p1,p2,t=parameters[1:4],parameters[4:8],parameters[8]
