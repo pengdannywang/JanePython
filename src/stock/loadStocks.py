@@ -113,4 +113,4 @@ outputfile = 'stocks.csv'
 da=pd.read_csv(inputfile,header=1)
 tickers=da.iloc[:,1].tolist()
 stocks=loadStocksByTickers(tickers,path,outputfile)
-stocks=loadStocksByTickers(tickers,path,outputfile)
+

@@ -212,8 +212,8 @@ def dynamicForacast(ticker,y,steps=1,disp=False):
     return result
 
 path='/root/pythondev/JanePython/'
-inputfile = path+'Yahoo.xlsx'
-outputfile = 'stocks2.csv'
+inputfile = path+'ASXListedCompanies.csv'
+outputfile = 'stocks.csv'
 savepath=path+outputfile
 data=pd.read_csv(savepath,parse_dates=['Date'],index_col='Date')
 data=data[[col for col in data.columns if pd.Series(data[col].values>1).sum()>30]]
