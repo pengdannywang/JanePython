@@ -112,5 +112,6 @@ outputfile = 'stocks.csv'
 
 da=pd.read_csv(inputfile,header=1)
 tickers=da.iloc[:,1].tolist()
+tickers=[ticker+'.AX' for ticker in tickers]
 stocks=loadStocksByTickers(tickers,path,outputfile)
 
