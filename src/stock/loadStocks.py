@@ -55,7 +55,7 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=12):
                         res=exist_ds[item].combine_first(remains)
                     else:
                         res=exist_ds[item]
-    
+                    res=res.loc[~res.index.duplicated(keep='first')]
                     exist_ds[item] =res
                     ds[item]=res
                 else:
