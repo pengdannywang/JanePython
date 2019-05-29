@@ -62,6 +62,7 @@ def loadStocksByTickers(scraped_tickers,path,outputfile,months=12):
                     start=getStartDate(end,months).date()
                     print(item,'is new and load from yahoo between',start,end,start<end)
                     res=web.DataReader(item,"yahoo",start,end)['Adj Close']
+                    res=res.loc[~res.index.duplicated(keep='first')]
                     ds[item]=res
                     exist_ds[item] =res
         
